@@ -12,6 +12,7 @@ struct game {
 	short nb_maps; // nb maps of the game
 	struct player* player;
 	struct bomb* bomb;
+	struct bomb* first_bomb;
 };
 
 struct game_backup {
@@ -45,8 +46,9 @@ struct game* game_new() {
 	game->map = map_load_data_from_file("data/map_0");
 	game->nb_maps = 8;
 
-	game->player = player_init(1, 1, 1, 0, 0);
+	game->player = player_init(1, 5, 1, 0, 0);
 	game->bomb = bomb_init();
+	game->first_bomb = game->bomb;
 	player_from_map(game->player, game->map); // get x,y of the player on the first map
 
 	return game;
@@ -56,7 +58,7 @@ void game_free(struct game* game) {
 	assert(game);
 
 	player_free(game->player);
-	//bomb_free
+	bomb_free(game->first_bomb);
 	map_free(game->map);
 }
 
@@ -75,6 +77,11 @@ struct map* game_get_map(struct game* game) {
 struct player* game_get_player(struct game* game) {
 	assert(game);
 	return game->player;
+}
+
+struct bomb* game_get_bomb(struct game* game){
+	assert(game);
+	return game->bomb;
 }
 
 void game_banner_display(struct game* game) {
@@ -129,7 +136,7 @@ void game_display(struct game* game) {
 	map_display(game->map);
 	player_display(game->player);
 	while (bomb_get_next_bomb(bomb_tmp) != NULL){
-		bomb_display(bomb_tmp, game->player);
+		bomb_display(bomb_tmp, game->player, game->map);
 		bomb_tmp = bomb_get_next_bomb(bomb_tmp);
 	}
 	window_refresh();
@@ -166,10 +173,8 @@ short input_keyboard(struct game* game) {
 				move = player_move(player, map);
 				break;
 			case SDLK_SPACE:
-
-				if (player_get_nb_bomb(game->player) > 0) {
+				if (player_get_nb_bomb(player) > 0) {
 					bomb_drop(game->bomb, player);
-					printf("bobby");
 				}
 				break;
 			default:
@@ -182,15 +187,20 @@ short input_keyboard(struct game* game) {
 	return move;
 }
 
-int game_update(struct game* game) {
+int game_update(struct game* game, struct game_backup* game_backup) {
 	int update;
 	update = input_keyboard(game);
-				// 1 : go to level 1
-				// 2 : go to level 2
-				// ...
-				// 7 : go to level 7
-				// 8 : no game update
-				// 9 : exit game
+	if (update <= 7){
+		game_keep_backup(game, game_backup);
+		game_change_level(game, game_backup, update);
+		update = 0;
+	}
+	if (update == 8){
+		update = 0;
+	}
+	if (update == 9){
+		update = 1;
+	}
 	return update;
 }
 

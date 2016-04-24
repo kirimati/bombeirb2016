@@ -13,6 +13,12 @@ void   player_free(struct player* player);
 // Return player's life
 int player_get_life(struct player* player);
 
+// Increase player's life
+void player_inc_life(struct player* player);
+
+// Decrease player's life
+void player_dec_life(struct player* player);
+
 // Returns the current position of the player
 int player_get_x(struct player* player);
 int player_get_y(struct player* player);

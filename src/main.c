@@ -4,6 +4,7 @@
 #include <game.h>
 #include <window.h>
 #include <misc.h>
+#include <bomb.h>
 
 
 int main(int argc, char *argv[]) {
@@ -27,25 +28,17 @@ int main(int argc, char *argv[]) {
 
 	// game loop
 	// static time rate implementation
-	int update = 8;
-	while (update != 9) {
+	int update = 0;
+	while (!update) {
 		timer = SDL_GetTicks();
 
-		update = game_update(game);
+		update = game_update(game, game_backup);
 		game_display(game);
 
 		execution_speed = SDL_GetTicks() - timer;
 		if (execution_speed < ideal_speed)
 			SDL_Delay(ideal_speed - execution_speed); // we are ahead of ideal time. let's wait.
-
-		// Change level
-		if (update <= 7){
-			game_keep_backup(game, game_backup);
-			game_change_level(game, game_backup, update);
-		}
-
 	}
-
 	game_backup_free(game_backup);
 	game_free(game);
 

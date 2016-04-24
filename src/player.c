@@ -43,6 +43,16 @@ int player_get_life(struct player* player){
 	return player->life;
 }
 
+void player_inc_life(struct player* player){
+	assert(player);
+	player->life += 1;
+}
+
+void player_dec_life(struct player* player){
+	assert(player);
+	player->life -= 1;
+}
+
 int player_get_x(struct player* player) {
 	assert(player != NULL);
 	return player->x;
@@ -182,7 +192,8 @@ static int player_move_aux(struct player* player, struct map* map, int x, int y)
 		map_open_door(map);
 		player->key++;
 		return 1;
-
+	case CELL_EXPLOSION:
+		break;
 	default:
 		break;
 	}
@@ -207,6 +218,9 @@ int player_move(struct player* player, struct map* map) {
 			case CELL_DOOR:
 				move = map_get_door_to_level(map ,x , y - 1);
 				return move;
+			case CELL_EXPLOSION:
+				player_dec_life(player);
+				break;
 			default :
 				break;
 			}
@@ -226,6 +240,9 @@ int player_move(struct player* player, struct map* map) {
 			case CELL_DOOR:
 				move = map_get_door_to_level(map, x, y + 1);
 				return move;
+			case CELL_EXPLOSION:
+				player_dec_life(player);
+				break;
 			default :
 				break;
 			}
@@ -245,6 +262,9 @@ int player_move(struct player* player, struct map* map) {
 			case CELL_DOOR:
 				move = map_get_door_to_level(map, x - 1, y);
 				return move;
+			case CELL_EXPLOSION:
+				player_dec_life(player);
+				break;
 			default :
 				break;
 			}
@@ -264,6 +284,9 @@ int player_move(struct player* player, struct map* map) {
 			case CELL_DOOR:
 				move = map_get_door_to_level(map, x + 1, y);
 				return move;
+			case CELL_EXPLOSION:
+				player_dec_life(player);
+				break;
 			default:
 				break;
 			}
@@ -282,17 +305,3 @@ void player_display(struct player* player) {
 			player->x * SIZE_BLOC, player->y * SIZE_BLOC);
 }
 
-
-void player_place_bomb(struct map* map, struct player* player){
-	if ((player_get_nb_bomb(player) > 0)){
-		player_dec_nb_bomb(player);
-		player_bomb_display(player);
-	}
-}
-
-
-void player_bomb_display(struct player* player){
-	assert(player);
-	window_display_image(sprite_get_bomb(4),
-				player->x * SIZE_BLOC, player->y * SIZE_BLOC);
-}

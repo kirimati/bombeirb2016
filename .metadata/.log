@@ -1,0 +1,24 @@
+!SESSION 2016-04-23 10:44:28.125 -----------------------------------------------
+eclipse.buildId=4.5.1.M20150904-0015
+java.version=1.7.0_80
+java.vendor=Oracle Corporation
+BootLoader constants: OS=macosx, ARCH=x86_64, WS=cocoa, NL=en_US
+Framework arguments:  -product org.eclipse.epp.package.cpp.product -keyring /Users/alexandresalino/.eclipse_keyring -showlocation
+Command-line arguments:  -os macosx -ws cocoa -arch x86_64 -product org.eclipse.epp.package.cpp.product -keyring /Users/alexandresalino/.eclipse_keyring -showlocation
+
+!ENTRY org.eclipse.core.net 1 0 2016-04-23 10:45:12.932
+!MESSAGE System property http.nonProxyHosts has been set to local|*.local|169.254/16|*.169.254/16 by an external source. This value will be overwritten using the values from the preferences
+
+!ENTRY org.eclipse.core.resources 4 77 2016-04-23 10:46:52.970
+!MESSAGE Invalid project description.
+!SUBENTRY 1 unknown 0 0 2016-04-23 10:46:52.971
+!MESSAGE OK
+!SUBENTRY 1 org.eclipse.core.resources 4 77 2016-04-23 10:46:52.971
+!MESSAGE /Users/alexandresalino/Documents/workspace/bombeirb2016 overlaps the workspace location: /Users/alexandresalino/Documents/workspace/bombeirb2016
+
+!ENTRY org.eclipse.core.resources 4 77 2016-04-23 10:47:58.129
+!MESSAGE Invalid project description.
+!SUBENTRY 1 unknown 0 0 2016-04-23 10:47:58.129
+!MESSAGE OK
+!SUBENTRY 1 org.eclipse.core.resources 4 77 2016-04-23 10:47:58.129
+!MESSAGE /Users/alexandresalino/Documents/workspace/bombeirb2016 overlaps the workspace location: /Users/alexandresalino/Documents/workspace/bombeirb2016

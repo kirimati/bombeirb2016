@@ -38,7 +38,9 @@
 #define BOMB_2       "sprite/bomb2.png"
 #define BOMB_3       "sprite/bomb3.png"
 #define BOMB_4       "sprite/bomb4.png"
-#define Explosion	 "sprite/explosion.png"
+
+// Sprites of Explosions
+#define EXPLOSION	 "sprite/explosion.png"
 
 // Sprites of Bonus
 #define IMG_BONUS_BOMB_RANGE_INC  "sprite/bonus_bomb_range_inc.png"
@@ -80,6 +82,8 @@ SDL_Surface* player_img[4];
 // bomb
 SDL_Surface* bomb[4];
 
+// explosion
+SDL_Surface* explosion;
 
 void banner_load() {
 	// numbers imgs
@@ -117,8 +121,6 @@ void banner_unload() {
 	SDL_FreeSurface(banner_flag);
 }
 
-SDL_Surface* explosion;
-
 void map_load() {
 	// Sprite loading
 	tree = load_image(MAP_TREE);
@@ -127,7 +129,6 @@ void map_load() {
 	stone = load_image(MAP_STONE);
 	door_opened = load_image(MAP_DOOR_OPENED);
 	door_closed = load_image(MAP_DOOR_CLOSED);
-	explosion = load_image(Explosion);
 }
 
 void map_unload() {
@@ -174,6 +175,14 @@ void bomb_load() {
 	bomb[3] = load_image(BOMB_4);
 }
 
+void explosion_load(){
+	explosion = load_image(EXPLOSION);
+}
+
+void explosion_unload(){
+	SDL_FreeSurface(explosion);
+}
+
 void bomb_unload() {
 	SDL_FreeSurface(bomb[0]);
 	SDL_FreeSurface(bomb[1]);
@@ -187,6 +196,7 @@ void sprite_load() {
 	banner_load();
 	player_load();
 	bomb_load();
+	explosion_load();
 }
 
 void sprite_free() {
@@ -195,6 +205,7 @@ void sprite_free() {
 	banner_unload();
 	player_unload();
 	bomb_unload();
+	explosion_unload();
 }
 
 SDL_Surface* sprite_get_number(short number) {

@@ -28,11 +28,14 @@ struct player* game_get_player(struct game* game);
 // Return the current map
 struct map* game_get_map(struct game* game);
 
+// Return bomb structure
+struct bomb* game_get_bomb(struct game* game);
+
 // Display the game on the screen
 void game_display(struct game* game);
 
 // update
-int game_update(struct game* game);
+int game_update(struct game* game, struct game_backup* game_backup);
 
 //Keep what the player changed on the map
 void game_keep_backup(struct game* game, struct game_backup* game_backup);

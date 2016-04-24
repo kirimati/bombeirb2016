@@ -9,6 +9,9 @@
 #include <misc.h>
 #include <sprite.h>
 #include <window.h>
+#include <player.h>
+#include <bomb.h>
+#include <game.h>
 
 struct map {
 	int width;
@@ -109,7 +112,6 @@ void map_open_door(struct map* map){
 		for (int j = 0; j < map_get_height(map); j++) {
 			if (map_get_cell_type(map, i, j) == CELL_DOOR) {
 		     	map->grid[CELL(i,j)] = (map->grid[CELL(i,j)] | (CELL_DOOR_OPENED << 7));
-		     	break;
 			}
 		}
 	}
@@ -188,9 +190,12 @@ void map_display(struct map* map)
 	    	window_display_image(sprite_get_key(), x, y);
 	    	break;
 	    case CELL_DOOR:
-	    	display_door(map,x ,y, type);
+	    	display_door(map, x ,y, type);
 	    	break;
 	    case CELL_BOMB:
+	    	break;
+	    case CELL_EXPLOSION:
+	    	window_display_image(sprite_get_explosion(), x, y);
 	    	break;
 	    }
 	  }

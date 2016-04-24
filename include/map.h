@@ -12,6 +12,7 @@ enum cell_type {
 	CELL_BOMB, 		// 7	0111
 	CELL_KEY, 		// 8	1000
 	CELL_DOOR, 		// 9	1001
+	CELL_EXPLOSION, // 10	1010
 };
 
 enum bonus_type {
