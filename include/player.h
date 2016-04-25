@@ -46,6 +46,9 @@ int player_get_current_level(struct player* player);
 // Load the player position from the map
 void player_from_map(struct player* player, struct map* map);
 
+// Disable invincibility when invincibility was enabled more than 2 seconds
+void player_invincibility(struct player* player);
+
 // Move the player according to the current direction
 int player_move(struct player* player, struct map* map);
 

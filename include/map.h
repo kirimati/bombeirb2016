@@ -85,6 +85,12 @@ void  map_set_cell_type(struct map* map, int x, int y, enum cell_type type);
 // Open door on the map
 void map_open_door(struct map* map);
 
+// Return the type of bonus inside a case
+enum bonus_type map_get_bonus_type(struct map* map, int x, int y);
+
+// Display the different types of bonus
+void display_bonus(struct map* map, int x, int y);
+
 // Test if (x,y) is within the map
 int map_is_inside(struct map* map, int x, int y);
 

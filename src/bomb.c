@@ -67,37 +67,92 @@ void bomb_from_map(struct bomb* bomb, struct map* map) {
 	}
 }*/
 
-void bomb_explosion_gestion(struct bomb* bomb, struct player* player, struct map* map, int x, int y){
-	switch (map_get_cell_type(map, x, y)){
-	case CELL_PLAYER:
+void bomb_player_gets_harmed(struct player* player, int x, int y){
+	if ((x == player_get_x(player)) && (y == player_get_y(player))){
 		player_dec_life(player);
-		map_set_cell_type(map, x, y, CELL_EXPLOSION);
-		break;
-	case CELL_CASE:
-		// Gestion des bonus
-		break;
-	case CELL_MONSTER:
-		//Gestion des monstres
-		break;
-	default:
-		break;
 	}
-	window_display_image(sprite_get_explosion(), x * SIZE_BLOC, y * SIZE_BLOC);
+}
+
+int bomb_explosion_gestion_aux(struct bomb* bomb, struct player* player, struct map* map, int x, int y){
+	if (map_is_inside(map, x, y)){
+		switch (map_get_cell_type(map, x, y)){
+		case CELL_PLAYER:
+			map_set_cell_type(map, x, y, CELL_EXPLOSION);
+			break;
+		case CELL_CASE:
+			window_display_image(sprite_get_explosion(), x * SIZE_BLOC, y * SIZE_BLOC);
+			return 0;
+		case CELL_MONSTER:
+			//Gestion des monstres
+			window_display_image(sprite_get_explosion(), x * SIZE_BLOC, y * SIZE_BLOC);
+			break;
+		case CELL_EMPTY:
+			map_set_cell_type(map, x, y, CELL_EXPLOSION);
+			window_display_image(sprite_get_explosion(), x * SIZE_BLOC, y * SIZE_BLOC);
+			break;
+		case CELL_BOMB:
+			map_set_cell_type(map, x, y, CELL_EXPLOSION);
+			window_display_image(sprite_get_explosion(), x * SIZE_BLOC, y * SIZE_BLOC);
+			break;
+		default:
+			break;
+		}
+	}
+	return 1;
 }
 
 void bomb_after_explosion_gestion(struct bomb* bomb, struct player* player, struct map* map, int x, int y){
-	switch (map_get_cell_type(map, x, y)){
-	case CELL_EXPLOSION:
-		map_set_cell_type(map, x, y, CELL_EMPTY);
-		break;
-	case CELL_CASE:
-		// Gestion des bonus
-		break;
-	case CELL_MONSTER:
-		//Gestion des monstres
-		break;
-	default:
-		break;
+	if (map_is_inside(map, x, y)){
+		switch (map_get_cell_type(map, x, y)){
+		case CELL_EXPLOSION:
+			map_set_cell_type(map, x, y, CELL_EMPTY);
+			break;
+		case CELL_CASE:
+			map_set_cell_type(map, x, y, CELL_BONUS);
+			break;
+		case CELL_MONSTER:
+			//Gestion des monstres
+			break;
+		case CELL_BOMB:
+			map_set_cell_type(map, x, y, CELL_EMPTY);
+			break;
+		default:
+			break;
+		}
+	}
+}
+
+void bomb_explosion_gestion(struct bomb* bomb, struct player* player, struct map* map){
+	int case_detection;
+	bomb_explosion_gestion_aux(bomb, player, map, bomb->x, bomb->y);
+	bomb_player_gets_harmed(player,bomb->x ,bomb->y);
+	for (int i = 1 ; i <= player_get_bomb_range(player) ; i++){
+		case_detection = bomb_explosion_gestion_aux(bomb, player, map, (bomb->x + i), bomb->y);
+		bomb_player_gets_harmed(player, (bomb->x + i), bomb->y);
+		if (!case_detection){
+			break;
+		}
+	}
+	for (int i = 1 ; i <= player_get_bomb_range(player) ; i++){
+		case_detection = bomb_explosion_gestion_aux(bomb, player, map, (bomb->x - i), bomb->y);
+		bomb_player_gets_harmed(player, (bomb->x - i), bomb->y);
+		if (!case_detection){
+			break;
+		}
+	}
+	for (int i = 1 ; i <= player_get_bomb_range(player) ; i++){
+		case_detection = bomb_explosion_gestion_aux(bomb, player, map, bomb->x, (bomb->y + i));
+		bomb_player_gets_harmed(player, bomb->x, (bomb->y + i));
+		if (!case_detection){
+			break;
+		}
+	}
+	for (int i = 1 ; i <= player_get_bomb_range(player) ; i++){
+		case_detection = bomb_explosion_gestion_aux(bomb, player, map, bomb->x, (bomb->y - i));
+		bomb_player_gets_harmed(player, bomb->x, (bomb->y - i));
+		if (!case_detection){
+			break;
+		}
 	}
 }
 
@@ -120,18 +175,16 @@ void bomb_display(struct bomb* bomb, struct player* player, struct map* map) {
 		window_display_image(sprite_get_bomb(0), bomb->x * SIZE_BLOC, bomb->y * SIZE_BLOC);
 		}
 	if ((t <= 5000) & (t > 4000)){
-		bomb_explosion_gestion(bomb, player, map, bomb->x, bomb->y);
-		bomb_explosion_gestion(bomb, player, map, (bomb->x + 1), bomb->y);
-		bomb_explosion_gestion(bomb, player, map, (bomb->x - 1), bomb->y);
-		bomb_explosion_gestion(bomb, player, map, bomb->x, (bomb->y + 1));
-		bomb_explosion_gestion(bomb, player, map, bomb->x, (bomb->y - 1));
+		bomb_explosion_gestion(bomb, player, map);
 	}
 	if (t > 5000){
 		bomb_after_explosion_gestion(bomb, player, map, bomb->x, bomb->y);
-		bomb_after_explosion_gestion(bomb, player, map, (bomb->x + 1), bomb->y);
-		bomb_after_explosion_gestion(bomb, player, map, (bomb->x - 1), bomb->y);
-		bomb_after_explosion_gestion(bomb, player, map, bomb->x, (bomb->y + 1));
-		bomb_after_explosion_gestion(bomb, player, map, bomb->x, (bomb->y - 1));
+		for (int i = 1 ; i <= player_get_bomb_range(player) ; i++){
+			bomb_after_explosion_gestion(bomb, player, map, (bomb->x + i), bomb->y);
+			bomb_after_explosion_gestion(bomb, player, map, (bomb->x - i), bomb->y);
+			bomb_after_explosion_gestion(bomb, player, map, bomb->x, (bomb->y + i));
+			bomb_after_explosion_gestion(bomb, player, map, bomb->x, (bomb->y - i));
+		}
 	}
 }
 

@@ -46,7 +46,7 @@ struct game* game_new() {
 	game->map = map_load_data_from_file("data/map_0");
 	game->nb_maps = 8;
 
-	game->player = player_init(1, 5, 1, 0, 0);
+	game->player = player_init(1, 5, 2, 0, 0);
 	game->bomb = bomb_init();
 	game->first_bomb = game->bomb;
 	player_from_map(game->player, game->map); // get x,y of the player on the first map

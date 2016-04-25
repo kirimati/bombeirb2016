@@ -15,6 +15,8 @@ struct player {
 	int bomb_range;
 	int key;
 	int current_level;
+	int invincibility;
+	int invincibility_timer;
 };
 
 struct player* player_init(int life, int bomb_number, int bomb_range, int key, int current_level) {
@@ -29,6 +31,7 @@ struct player* player_init(int life, int bomb_number, int bomb_range, int key, i
 	player->bomb_range = bomb_range;
 	player->current_level = current_level;
 	player->key = key;
+	player->invincibility = 0;
 
 	return player;
 }
@@ -50,7 +53,12 @@ void player_inc_life(struct player* player){
 
 void player_dec_life(struct player* player){
 	assert(player);
-	player->life -= 1;
+	if (player->invincibility == 0){
+		player->life -= 1;
+		player->invincibility_timer = SDL_GetTicks();
+		player->invincibility = 1;
+	}
+
 }
 
 int player_get_x(struct player* player) {
@@ -118,6 +126,13 @@ void player_from_map(struct player* player, struct map* map) {
 	}
 }
 
+void player_invincibility(struct player* player){
+	int t = (SDL_GetTicks() - player->invincibility_timer);
+	if (t > 2000){
+		player->invincibility = 0;
+	}
+}
+
 static int player_move_aux(struct player* player, struct map* map, int x, int y) {
 
 	if (!map_is_inside(map, x, y))
@@ -178,21 +193,20 @@ static int player_move_aux(struct player* player, struct map* map, int x, int y)
 	case CELL_MONSTER:
 		break;
 
-	case CELL_PLAYER:
-		break;
-
 	case CELL_DOOR:
 		if (map_get_door_state(map,x ,y)){
 			return 1;
 		}
 		return 0;
 		break;
-
 	case CELL_KEY:
 		map_open_door(map);
 		player->key++;
 		return 1;
+	case CELL_BOMB:
+		return 0;
 	case CELL_EXPLOSION:
+		player_dec_life(player);
 		break;
 	default:
 		break;
@@ -218,9 +232,6 @@ int player_move(struct player* player, struct map* map) {
 			case CELL_DOOR:
 				move = map_get_door_to_level(map ,x , y - 1);
 				return move;
-			case CELL_EXPLOSION:
-				player_dec_life(player);
-				break;
 			default :
 				break;
 			}
@@ -240,9 +251,6 @@ int player_move(struct player* player, struct map* map) {
 			case CELL_DOOR:
 				move = map_get_door_to_level(map, x, y + 1);
 				return move;
-			case CELL_EXPLOSION:
-				player_dec_life(player);
-				break;
 			default :
 				break;
 			}
@@ -262,9 +270,6 @@ int player_move(struct player* player, struct map* map) {
 			case CELL_DOOR:
 				move = map_get_door_to_level(map, x - 1, y);
 				return move;
-			case CELL_EXPLOSION:
-				player_dec_life(player);
-				break;
 			default :
 				break;
 			}
@@ -284,9 +289,6 @@ int player_move(struct player* player, struct map* map) {
 			case CELL_DOOR:
 				move = map_get_door_to_level(map, x + 1, y);
 				return move;
-			case CELL_EXPLOSION:
-				player_dec_life(player);
-				break;
 			default:
 				break;
 			}
@@ -301,6 +303,8 @@ int player_move(struct player* player, struct map* map) {
 
 void player_display(struct player* player) {
 	assert(player);
+	player_invincibility(player);
+	// faire clignoter le player
 	window_display_image(sprite_get_player(player->current_direction),
 			player->x * SIZE_BLOC, player->y * SIZE_BLOC);
 }
