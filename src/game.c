@@ -12,7 +12,6 @@ struct game {
 	short nb_maps; // nb maps of the game
 	struct player* player;
 	struct bomb* bomb;
-	struct bomb* first_bomb;
 };
 
 struct game_backup {
@@ -46,9 +45,8 @@ struct game* game_new() {
 	game->map = map_load_data_from_file("data/map_0");
 	game->nb_maps = 8;
 
-	game->player = player_init(1, 5, 1, 0, 0);
-	game->bomb = bomb_init();
-	game->first_bomb = game->bomb;
+	game->player = player_init(4, 5, 2, 0, 0);
+	game->bomb = bomb_init(game->player);
 	player_from_map(game->player, game->map); // get x,y of the player on the first map
 
 	return game;
@@ -58,7 +56,7 @@ void game_free(struct game* game) {
 	assert(game);
 
 	player_free(game->player);
-	bomb_free(game->first_bomb);
+	bomb_free(game->bomb);
 	map_free(game->map);
 }
 
@@ -189,19 +187,24 @@ short input_keyboard(struct game* game) {
 
 int game_update(struct game* game, struct game_backup* game_backup) {
 	int update;
-	update = input_keyboard(game);
-	if (update <= 7){
-		game_keep_backup(game, game_backup);
-		game_change_level(game, game_backup, update);
-		update = 0;
+	if (!player_is_dead(game->player)){
+		update = input_keyboard(game);
+		if (update <= 7){
+			game_keep_backup(game, game_backup);
+			game_change_level(game, game_backup, update);
+			update = 0;
+		}
+		if (update == 8){
+			update = 0;
+		}
+		if (update == 9){
+			update = 1;
+		}
+		return update;
 	}
-	if (update == 8){
-		update = 0;
+	else{
+		return 1;
 	}
-	if (update == 9){
-		update = 1;
-	}
-	return update;
 }
 
 void game_keep_backup(struct game* game, struct game_backup* game_backup){

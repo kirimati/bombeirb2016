@@ -47,6 +47,7 @@
 #define IMG_BONUS_BOMB_RANGE_DEC  "sprite/bonus_bomb_range_dec.png"
 #define IMG_BONUS_BOMB_NB_INC     "sprite/bonus_bomb_nb_inc.png"
 #define IMG_BONUS_BOMB_NB_DEC     "sprite/bonus_bomb_nb_dec.png"
+#define IMG_BONUS_LIFE			  "sprite/life.png"
 
 // Sprites of Players
 #define PLAYER_LEFT     "sprite/player_left.png"
@@ -73,7 +74,7 @@ SDL_Surface* stone;
 SDL_Surface* tree;
 
 // bonus
-#define NB_BONUS 4
+#define NB_BONUS 6
 SDL_Surface* bonus[NB_BONUS + 1];
 
 // player
@@ -148,6 +149,7 @@ void bonus_load() {
 	bonus[BONUS_BOMB_RANGE_DEC] = load_image(IMG_BONUS_BOMB_RANGE_DEC);
 	bonus[BONUS_BOMB_NB_INC] = load_image(IMG_BONUS_BOMB_NB_INC);
 	bonus[BONUS_BOMB_NB_DEC] = load_image(IMG_BONUS_BOMB_NB_DEC);
+	bonus[BONUS_LIFE] = load_image(IMG_BONUS_LIFE);
 }
 
 void bonus_unload() {

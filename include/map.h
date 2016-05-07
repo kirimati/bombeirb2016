@@ -73,6 +73,9 @@ int map_get_height(struct map* map);
 // Return the type of a cell
 enum cell_type map_get_cell_type(struct map* map, int x, int y);
 
+// Return the type of a case
+enum compose_type map_get_case_type(struct map* map, int x, int y);
+
 // Return the number of the level where the door goes
 enum door_to_level map_get_door_to_level(struct map* map, int x, int y);
 
@@ -82,8 +85,20 @@ enum door_state map_get_door_state(struct map* map, int x, int y);
 // Set the type of a cell
 void  map_set_cell_type(struct map* map, int x, int y, enum cell_type type);
 
+// Set the type of a bonus cell
+void map_set_bonus_type(struct map* map, int x, int y, enum bonus_type type);
+
+// Set the type a case cell
+void map_set_case_type(struct map* map, int x, int y, enum compose_type type);
+
 // Open door on the map
 void map_open_door(struct map* map);
+
+// Return the type of bonus inside a case
+enum bonus_type map_get_bonus_type(struct map* map, int x, int y);
+
+// Display the different types of bonus
+void display_bonus(struct map* map, int x, int y, unsigned char type);
 
 // Test if (x,y) is within the map
 int map_is_inside(struct map* map, int x, int y);
