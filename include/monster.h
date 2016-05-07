@@ -1,5 +1,5 @@
-#ifndef ZOMBIE_H_
-#define ZOMBIE_H_
+#ifndef MONSTER_H_
+#define MONSTER_H_
 
 #include <map.h>
 #include <constant.h>
@@ -59,6 +59,6 @@ void zombie_display(struct zombie* zombie);
 void zombie_place_bomb(struct map* map, struct zombie* zombie);
 
 // Display the bomb on the screen
-void zombie_bomb_display(struct zombie* zombie);
+void zombie_bomb_display(struct zombie* monster);
 
-#endif /* ZOMBIE_H_ */
+#endif /* MONSTER_H_ */
