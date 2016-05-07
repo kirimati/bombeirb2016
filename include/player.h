@@ -49,12 +49,15 @@ void player_from_map(struct player* player, struct map* map);
 // Disable invincibility when invincibility was enabled more than 2 seconds
 void player_invincibility(struct player* player);
 
+<<<<<<< HEAD
 // Affects the player when he picks up a bonus
 void player_bonus_effects(struct player* player, struct map* map, int x, int y);
 
 // Allows the player to move a case or not
 int player_move_case_aux(struct player* player, struct map* map, int x, int y);
 
+=======
+>>>>>>> origin/master
 // Move the player according to the current direction
 int player_move(struct player* player, struct map* map);
 

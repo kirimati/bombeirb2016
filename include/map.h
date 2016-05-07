@@ -98,7 +98,11 @@ void map_open_door(struct map* map);
 enum bonus_type map_get_bonus_type(struct map* map, int x, int y);
 
 // Display the different types of bonus
+<<<<<<< HEAD
 void display_bonus(struct map* map, int x, int y, unsigned char type);
+=======
+void display_bonus(struct map* map, int x, int y);
+>>>>>>> origin/master
 
 // Test if (x,y) is within the map
 int map_is_inside(struct map* map, int x, int y);

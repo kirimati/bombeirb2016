@@ -133,6 +133,7 @@ void player_invincibility(struct player* player){
 	}
 }
 
+<<<<<<< HEAD
 void player_bonus_effects(struct player* player, struct map* map, int x, int y){
 	switch (map_get_bonus_type(map, x, y)){
 	case BONUS_BOMB_RANGE_DEC:
@@ -201,6 +202,8 @@ int player_move_case_aux(struct player* player, struct map* map, int x, int y){
 	return 0;
 }
 
+=======
+>>>>>>> origin/master
 static int player_move_aux(struct player* player, struct map* map, int x, int y) {
 
 	if (!map_is_inside(map, x, y))
@@ -226,15 +229,19 @@ static int player_move_aux(struct player* player, struct map* map, int x, int y)
 		}
 		return 0;
 		break;
-
 	case CELL_KEY:
 		map_open_door(map);
 		player->key++;
 		return 1;
+<<<<<<< HEAD
 
 	case CELL_BOMB:
 		return 0;
 
+=======
+	case CELL_BOMB:
+		return 0;
+>>>>>>> origin/master
 	case CELL_EXPLOSION:
 		player_dec_life(player);
 		break;

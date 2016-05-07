@@ -82,7 +82,11 @@ int bomb_explosion_gestion_aux(struct bomb* bomb, struct player* player, struct 
 	if (map_is_inside(map, x, y)){
 		switch (map_get_cell_type(map, x, y)){
 		case CELL_PLAYER:
+<<<<<<< HEAD
 			window_display_image(sprite_get_explosion(), x * SIZE_BLOC, y * SIZE_BLOC);
+=======
+			map_set_cell_type(map, x, y, CELL_EXPLOSION);
+>>>>>>> origin/master
 			break;
 		case CELL_CASE:
 			window_display_image(sprite_get_explosion(), x * SIZE_BLOC, y * SIZE_BLOC);
@@ -99,13 +103,17 @@ int bomb_explosion_gestion_aux(struct bomb* bomb, struct player* player, struct 
 			map_set_cell_type(map, x, y, CELL_EXPLOSION);
 			window_display_image(sprite_get_explosion(), x * SIZE_BLOC, y * SIZE_BLOC);
 			break;
+<<<<<<< HEAD
 		case CELL_DOOR:
 			return 0;
+=======
+>>>>>>> origin/master
 		default:
 			break;
 		}
 	}
 	return 1;
+<<<<<<< HEAD
 }
 
 int bomb_after_explosion_gestion_aux(struct bomb* bomb, struct player* player, struct map* map, int x, int y){
@@ -174,24 +182,75 @@ void bomb_after_explosion_gestion(struct bomb* bomb, struct player* player, stru
 	for (int i = 1 ; i <= player_get_bomb_range(player) ; i++){
 		detection = bomb_after_explosion_gestion_aux(bomb, player, map, (bomb->x + i), bomb->y);
 		if (!detection){
+=======
+}
+
+void bomb_after_explosion_gestion(struct bomb* bomb, struct player* player, struct map* map, int x, int y){
+	if (map_is_inside(map, x, y)){
+		switch (map_get_cell_type(map, x, y)){
+		case CELL_EXPLOSION:
+			map_set_cell_type(map, x, y, CELL_EMPTY);
+			break;
+		case CELL_CASE:
+			map_set_cell_type(map, x, y, CELL_BONUS);
+			break;
+		case CELL_MONSTER:
+			//Gestion des monstres
+			break;
+		case CELL_BOMB:
+			map_set_cell_type(map, x, y, CELL_EMPTY);
+			break;
+		default:
+			break;
+		}
+	}
+}
+
+void bomb_explosion_gestion(struct bomb* bomb, struct player* player, struct map* map){
+	int case_detection;
+	bomb_explosion_gestion_aux(bomb, player, map, bomb->x, bomb->y);
+	bomb_player_gets_harmed(player,bomb->x ,bomb->y);
+	for (int i = 1 ; i <= player_get_bomb_range(player) ; i++){
+		case_detection = bomb_explosion_gestion_aux(bomb, player, map, (bomb->x + i), bomb->y);
+		bomb_player_gets_harmed(player, (bomb->x + i), bomb->y);
+		if (!case_detection){
+>>>>>>> origin/master
 			break;
 		}
 	}
 	for (int i = 1 ; i <= player_get_bomb_range(player) ; i++){
+<<<<<<< HEAD
 		detection = bomb_after_explosion_gestion_aux(bomb, player, map, (bomb->x - i), bomb->y);
 		if (!detection){
+=======
+		case_detection = bomb_explosion_gestion_aux(bomb, player, map, (bomb->x - i), bomb->y);
+		bomb_player_gets_harmed(player, (bomb->x - i), bomb->y);
+		if (!case_detection){
+>>>>>>> origin/master
 			break;
 		}
 	}
 	for (int i = 1 ; i <= player_get_bomb_range(player) ; i++){
+<<<<<<< HEAD
 		detection = bomb_after_explosion_gestion_aux(bomb, player, map, bomb->x, (bomb->y + i));
 		if (!detection){
+=======
+		case_detection = bomb_explosion_gestion_aux(bomb, player, map, bomb->x, (bomb->y + i));
+		bomb_player_gets_harmed(player, bomb->x, (bomb->y + i));
+		if (!case_detection){
+>>>>>>> origin/master
 			break;
 		}
 	}
 	for (int i = 1 ; i <= player_get_bomb_range(player) ; i++){
+<<<<<<< HEAD
 		detection = bomb_after_explosion_gestion_aux(bomb, player, map, bomb->x, (bomb->y - i));
 		if (!detection){
+=======
+		case_detection = bomb_explosion_gestion_aux(bomb, player, map, bomb->x, (bomb->y - i));
+		bomb_player_gets_harmed(player, bomb->x, (bomb->y - i));
+		if (!case_detection){
+>>>>>>> origin/master
 			break;
 		}
 	}
@@ -221,6 +280,20 @@ void bomb_display(struct bomb* bomb, struct player* player, struct map* map) {
 			bomb_after_explosion_gestion(bomb, player, map);
 			bomb->end_bomb = 1;
 		}
+<<<<<<< HEAD
+=======
+	if ((t <= 5000) & (t > 4000)){
+		bomb_explosion_gestion(bomb, player, map);
+	}
+	if (t > 5000){
+		bomb_after_explosion_gestion(bomb, player, map, bomb->x, bomb->y);
+		for (int i = 1 ; i <= player_get_bomb_range(player) ; i++){
+			bomb_after_explosion_gestion(bomb, player, map, (bomb->x + i), bomb->y);
+			bomb_after_explosion_gestion(bomb, player, map, (bomb->x - i), bomb->y);
+			bomb_after_explosion_gestion(bomb, player, map, bomb->x, (bomb->y + i));
+			bomb_after_explosion_gestion(bomb, player, map, bomb->x, (bomb->y - i));
+		}
+>>>>>>> origin/master
 	}
 }
 

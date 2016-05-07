@@ -74,7 +74,11 @@ SDL_Surface* stone;
 SDL_Surface* tree;
 
 // bonus
+<<<<<<< HEAD
 #define NB_BONUS 6
+=======
+#define NB_BONUS 5
+>>>>>>> origin/master
 SDL_Surface* bonus[NB_BONUS + 1];
 
 // player
