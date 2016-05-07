@@ -11,6 +11,7 @@ struct game {
 	struct map* map; // the game's map
 	short nb_maps; // nb maps of the game
 	struct player* player;
+	struct monster* monster;
 	struct bomb* bomb;
 	struct bomb* first_bomb;
 };
@@ -47,6 +48,7 @@ struct game* game_new() {
 	game->nb_maps = 8;
 
 	game->player = player_init(1, 5, 2, 0, 0);
+	game->monster = monster_init(1,1);
 	game->bomb = bomb_init();
 	game->first_bomb = game->bomb;
 	player_from_map(game->player, game->map); // get x,y of the player on the first map
@@ -56,7 +58,7 @@ struct game* game_new() {
 
 void game_free(struct game* game) {
 	assert(game);
-
+	monster_free(game->monster);
 	player_free(game->player);
 	bomb_free(game->first_bomb);
 	map_free(game->map);
@@ -77,6 +79,11 @@ struct map* game_get_map(struct game* game) {
 struct player* game_get_player(struct game* game) {
 	assert(game);
 	return game->player;
+}
+
+struct monster* game_get_monster(struct game* game) {
+	assert(game);
+	return game->monster;
 }
 
 struct bomb* game_get_bomb(struct game* game){
@@ -135,6 +142,7 @@ void game_display(struct game* game) {
 	game_banner_display(game);
 	map_display(game->map);
 	player_display(game->player);
+	monster_display(game->monster);
 	while (bomb_get_next_bomb(bomb_tmp) != NULL){
 		bomb_display(bomb_tmp, game->player, game->map);
 		bomb_tmp = bomb_get_next_bomb(bomb_tmp);

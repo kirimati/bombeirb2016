@@ -10,6 +10,7 @@
 #include <sprite.h>
 #include <window.h>
 #include <player.h>
+#include <monster.h>
 #include <bomb.h>
 #include <game.h>
 
@@ -159,6 +160,7 @@ void display_scenery(struct map* map, int x, int  y, unsigned char type)
 	case SCENERY_TREE:
 		window_display_image(sprite_get_tree(), x, y);
 		break;
+
 	}
 }
 
@@ -190,6 +192,9 @@ void map_display(struct map* map)
 		case CELL_SCENERY:
 			display_scenery(map, x, y, type);
 		  	break;
+		case CELL_MONSTER:
+			window_display_image(sprite_get_monster(), x, y);
+			break;
 	    case CELL_CASE:
 	    	window_display_image(sprite_get_box(), x, y);
 	    	break;
