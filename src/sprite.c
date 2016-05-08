@@ -47,12 +47,19 @@
 #define IMG_BONUS_BOMB_RANGE_DEC  "sprite/bonus_bomb_range_dec.png"
 #define IMG_BONUS_BOMB_NB_INC     "sprite/bonus_bomb_nb_inc.png"
 #define IMG_BONUS_BOMB_NB_DEC     "sprite/bonus_bomb_nb_dec.png"
+#define IMG_BONUS_LIFE			  "sprite/life.png"
 
 // Sprites of Players
 #define PLAYER_LEFT     "sprite/player_left.png"
 #define PLAYER_UP       "sprite/player_up.png"
 #define PLAYER_RIGHT    "sprite/player_right.png"
 #define PLAYER_DOWN     "sprite/player_down.png"
+
+//Sprites of Monsters
+#define MONSTER_LEFT     "sprite/monster_left.png"
+#define MONSTER_UP       "sprite/monster_up.png"
+#define MONSTER_RIGHT    "sprite/monster_right.png"
+#define MONSTER_DOWN     "sprite/monster_down.png"
 
 // banner
 SDL_Surface* numbers[10];
@@ -73,7 +80,7 @@ SDL_Surface* stone;
 SDL_Surface* tree;
 
 // bonus
-#define NB_BONUS 4
+#define NB_BONUS 6
 SDL_Surface* bonus[NB_BONUS + 1];
 
 // player
@@ -84,6 +91,9 @@ SDL_Surface* bomb[4];
 
 // explosion
 SDL_Surface* explosion;
+
+// monsters
+SDL_Surface* monster_img[4];
 
 void banner_load() {
 	// numbers imgs
@@ -148,6 +158,7 @@ void bonus_load() {
 	bonus[BONUS_BOMB_RANGE_DEC] = load_image(IMG_BONUS_BOMB_RANGE_DEC);
 	bonus[BONUS_BOMB_NB_INC] = load_image(IMG_BONUS_BOMB_NB_INC);
 	bonus[BONUS_BOMB_NB_DEC] = load_image(IMG_BONUS_BOMB_NB_DEC);
+	bonus[BONUS_LIFE] = load_image(IMG_BONUS_LIFE);
 }
 
 void bonus_unload() {
@@ -190,6 +201,18 @@ void bomb_unload() {
 	SDL_FreeSurface(bomb[3]);
 }
 
+void monster_load(){
+	monster_img[WEST] = load_image(MONSTER_LEFT);
+	monster_img[EAST] = load_image(MONSTER_RIGHT);
+	monster_img[NORTH] = load_image(MONSTER_UP);
+	monster_img[SOUTH] = load_image(MONSTER_DOWN);
+}
+
+void monster_unload() {
+	for (int i = 0; i < 4; i++)
+		SDL_FreeSurface(monster_img[i]);
+}
+
 void sprite_load() {
 	map_load();
 	bonus_load();
@@ -197,6 +220,7 @@ void sprite_load() {
 	player_load();
 	bomb_load();
 	explosion_load();
+	monster_load();
 }
 
 void sprite_free() {
@@ -206,6 +230,7 @@ void sprite_free() {
 	player_unload();
 	bomb_unload();
 	explosion_unload();
+	monster_unload();
 }
 
 SDL_Surface* sprite_get_number(short number) {
@@ -291,4 +316,9 @@ SDL_Surface* sprite_get_bomb(int time){
 SDL_Surface* sprite_get_explosion(){
 	assert(explosion);
 	return explosion;
+}
+
+SDL_Surface* sprite_get_monster(enum direction direction) {
+	assert(monster_img[direction]);
+	return monster_img[direction];
 }

@@ -4,6 +4,9 @@
 #include <player.h>
 #include <map.h>
 
+extern int time_start_pause;
+extern int time_paused;
+
 // Abstract data type
 struct game;
 
@@ -33,6 +36,9 @@ struct bomb* game_get_bomb(struct game* game);
 
 // Display the game on the screen
 void game_display(struct game* game);
+
+// pause the game
+int game_pause(struct game* game, int update);
 
 // update
 int game_update(struct game* game, struct game_backup* game_backup);

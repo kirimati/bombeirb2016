@@ -4,11 +4,12 @@
 #include <map.h>
 #include <constant.h>
 #include <player.h>
+#include <monster.h>
 
 struct bomb;
 
 // Creates a new bomb
-struct bomb* bomb_init();
+struct bomb* bomb_init(struct player* player);
 
 
 void bomb_free(struct bomb* bomb);
@@ -17,21 +18,11 @@ void bomb_free(struct bomb* bomb);
 int bomb_get_x(struct bomb* bomb);
 int bomb_get_y(struct bomb* bomb);
 
-
 // Returns the next bomb
 struct bomb* bomb_get_next_bomb(struct bomb* bomb);
 
-// Load the bomb position from the map
-//void bomb_from_map(struct bomb* bomb, struct map* map);
-
-// Control the explosion consequences
-void bomb_explosion_gestion(struct bomb* bomb, struct player* player, struct map* map, int x, int y);
-
-// Control the after explosion consequences
-void bomb_after_explosion_gestion(struct bomb* bomb, struct player* player, struct map* map, int x, int y);
-
 // Display the bomb on the screen
-void bomb_display(struct bomb* bomb, struct player* player, struct map* map);
+void bomb_display(struct bomb* bomb, struct player* player, struct map* map, struct monster* monster);
 
 void bomb_set_cell_type(struct bomb* bomb, struct player* player, struct map* map);
 

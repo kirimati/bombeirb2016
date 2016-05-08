@@ -24,4 +24,14 @@ enum direction {
 	EAST //3
 };
 
+// monster speed
+#define SPEED_LVL_0 1000
+#define SPEED_LVL_1 900
+#define SPEED_LVL_2 800
+#define SPEED_LVL_3 700
+#define SPEED_LVL_4 500
+#define SPEED_LVL_5 300
+#define SPEED_LVL_6 200
+#define SPEED_LVL_7 80
+
 #endif /* CONSTANT */

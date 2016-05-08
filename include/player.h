@@ -8,7 +8,7 @@ struct player;
 
 // Creates a new player with a given number of available bombs
 struct player* player_init(int life, int bomb_number, int bomb_range,int key, int current_level);
-void   player_free(struct player* player);
+void player_free(struct player* player);
 
 // Return player's life
 int player_get_life(struct player* player);
@@ -46,16 +46,22 @@ int player_get_current_level(struct player* player);
 // Load the player position from the map
 void player_from_map(struct player* player, struct map* map);
 
+// Disable invincibility when invincibility was enabled more than 2 seconds
+void player_invincibility(struct player* player);
+
+// Affects the player when he picks up a bonus
+void player_bonus_effects(struct player* player, struct map* map, int x, int y);
+
+// Allows the player to move a case or not
+int player_move_case_aux(struct player* player, struct map* map, int x, int y);
+
 // Move the player according to the current direction
 int player_move(struct player* player, struct map* map);
 
 // Display the player on the screen
 void player_display(struct player* player);
 
-// The player places a bomb
-void player_place_bomb(struct map* map, struct player* player);
-
-// Display the bomb on the screen
-void player_bomb_display(struct player* player);
+// Indicates if player is dead or not
+int player_is_dead(struct player* player);
 
 #endif /* PLAYER_H_ */
