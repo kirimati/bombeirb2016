@@ -130,6 +130,7 @@ void player_from_map(struct player* player, struct map* map) {
 }
 
 void player_invincibility(struct player* player){
+<<<<<<< HEAD
 	int t;
 	if (time_start_pause > player->invincibility_timer){
 		t = (SDL_GetTicks() - player->invincibility_timer - time_paused);
@@ -137,11 +138,18 @@ void player_invincibility(struct player* player){
 	else{
 		t = (SDL_GetTicks() - player->invincibility_timer);
 	}
+=======
+	int t = (SDL_GetTicks() - player->invincibility_timer);
+>>>>>>> origin/master
 	if (t > 2000){
 		player->invincibility = 0;
 	}
 }
 
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+>>>>>>> origin/master
 void player_bonus_effects(struct player* player, struct map* map, int x, int y){
 	switch (map_get_bonus_type(map, x, y)){
 	case BONUS_BOMB_RANGE_DEC:
@@ -210,6 +218,11 @@ int player_move_case_aux(struct player* player, struct map* map, int x, int y){
 	return 0;
 }
 
+<<<<<<< HEAD
+=======
+=======
+>>>>>>> origin/master
+>>>>>>> origin/master
 static int player_move_aux(struct player* player, struct map* map, int x, int y) {
 
 	if (!map_is_inside(map, x, y))
@@ -235,15 +248,25 @@ static int player_move_aux(struct player* player, struct map* map, int x, int y)
 		}
 		return 0;
 		break;
-
 	case CELL_KEY:
 		map_open_door(map);
 		player->key++;
 		return 1;
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+>>>>>>> origin/master
 
 	case CELL_BOMB:
 		return 0;
 
+<<<<<<< HEAD
+=======
+=======
+	case CELL_BOMB:
+		return 0;
+>>>>>>> origin/master
+>>>>>>> origin/master
 	case CELL_EXPLOSION:
 		player_dec_life(player);
 		break;

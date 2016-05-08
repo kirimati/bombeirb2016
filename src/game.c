@@ -18,7 +18,10 @@ struct game {
 	short nb_maps; // nb maps of the game
 	struct player* player;
 	struct bomb* bomb;
+<<<<<<< HEAD
 	struct monster* monster;
+=======
+>>>>>>> origin/master
 };
 
 struct game_backup {
@@ -52,9 +55,20 @@ struct game* game_new() {
 	game->map = map_load_data_from_file("data/map_0");
 	game->nb_maps = 8;
 
+<<<<<<< HEAD
 	game->player = player_init(2, 5, 2, 0, 0);
 	game->bomb = bomb_init(game->player);
 	game->monster = monster_init();
+=======
+<<<<<<< HEAD
+	game->player = player_init(4, 5, 2, 0, 0);
+	game->bomb = bomb_init(game->player);
+=======
+	game->player = player_init(1, 5, 2, 0, 0);
+	game->bomb = bomb_init();
+	game->first_bomb = game->bomb;
+>>>>>>> origin/master
+>>>>>>> origin/master
 	player_from_map(game->player, game->map); // get x,y of the player on the first map
 	monster_from_map(game->monster, game->map, game->player);
 	return game;
@@ -65,7 +79,10 @@ void game_free(struct game* game) {
 
 	player_free(game->player);
 	bomb_free(game->bomb);
+<<<<<<< HEAD
 	monster_free(game->monster);
+=======
+>>>>>>> origin/master
 	map_free(game->map);
 }
 
@@ -325,7 +342,10 @@ void monster_IA(struct game* game) {
 
 int game_update(struct game* game, struct game_backup* game_backup) {
 	int update;
+<<<<<<< HEAD
 	monster_IA(game);
+=======
+>>>>>>> origin/master
 	if (!player_is_dead(game->player)){
 		update = input_keyboard(game);
 		if (update <= 7){
@@ -339,9 +359,12 @@ int game_update(struct game* game, struct game_backup* game_backup) {
 		if (update == 9){
 			update = 1;
 		}
+<<<<<<< HEAD
 		if (update == 10){
 			update = game_pause(game, update);
 		}
+=======
+>>>>>>> origin/master
 		return update;
 	}
 	else{
