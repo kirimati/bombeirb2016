@@ -2,13 +2,6 @@
 #include <assert.h>
 
 #include <monster.h>
-#include <sprite.h>
-#include <window.h>
-#include <misc.h>
-#include <constant.h>
-#include <game.h>
-#include <player.h>
-
 
 struct monster {
 	int life;
@@ -87,18 +80,14 @@ void monster_from_map(struct monster* monster, struct map* map, struct player* p
 	for (i = 0; i < map_get_width(map); i++) {
 	  for (j = 0; j < map_get_height(map); j++) {
 	    if (map_get_cell_type(map, i, j) == CELL_MONSTER) {
-	      monster->x = i;
-	      monster->y = j;
-	      monster->current_level = player_get_current_level(player);
-	      monster->next_monster = monster_init();
-	      monster = monster->next_monster;
+	      monster_birth(monster, player, i, j);
 	    }
 	  }
 	}
 }
 
 
-int monster_move_aux(struct monster* monster, struct map* map, int x, int y) {
+int monster_move_aux(struct monster* monster, struct map* map, struct player* player, int x, int y) {
 	if (!map_is_inside(map, x, y))
 		return 0;
 
@@ -108,7 +97,10 @@ int monster_move_aux(struct monster* monster, struct map* map, int x, int y) {
 
 	case CELL_EXPLOSION:
 		monster_dec_life(monster);
-		break;
+		return 1;
+	case CELL_PLAYER:
+		player_dec_life(player);
+		return 1;
 	default:
 		return 0;
 	}
@@ -117,14 +109,14 @@ int monster_move_aux(struct monster* monster, struct map* map, int x, int y) {
 	return 1;
 }
 
-void monster_move(struct monster* monster, struct map* map) {
+void monster_move(struct monster* monster, struct map* map, struct player* player) {
 	int x = monster->x;
 	int y = monster->y;
 	monster->timer_move = SDL_GetTicks();
-	if (!monster_is_dead(monster)){
+	if (!monster_is_dead(monster, map) && (monster->current_level == player_get_current_level(player))){
 		switch (monster->current_direction) {
 		case NORTH:
-			if (monster_move_aux(monster, map, x, y - 1)) {
+			if (monster_move_aux(monster, map, player, x, y - 1)) {
 				monster->y--;
 				map_set_cell_type(map, x, y, CELL_EMPTY);
 				map_set_cell_type(map, monster->x, monster->y, CELL_MONSTER);
@@ -132,7 +124,7 @@ void monster_move(struct monster* monster, struct map* map) {
 			break;
 
 		case SOUTH:
-			if (monster_move_aux(monster, map, x, y + 1)) {
+			if (monster_move_aux(monster, map, player, x, y + 1)) {
 				monster->y++;
 				map_set_cell_type(map, x, y, CELL_EMPTY);
 				map_set_cell_type(map, monster->x, monster->y, CELL_MONSTER);
@@ -140,7 +132,7 @@ void monster_move(struct monster* monster, struct map* map) {
 			break;
 
 		case WEST:
-			if (monster_move_aux(monster, map, x - 1, y)) {
+			if (monster_move_aux(monster, map, player, x - 1, y)) {
 				monster->x--;
 				map_set_cell_type(map, x, y, CELL_EMPTY);
 				map_set_cell_type(map, monster->x, monster->y, CELL_MONSTER);
@@ -148,7 +140,7 @@ void monster_move(struct monster* monster, struct map* map) {
 			break;
 
 		case EAST:
-			if (monster_move_aux(monster, map, x + 1, y)) {
+			if (monster_move_aux(monster, map, player, x + 1, y)) {
 				monster->x++;
 				map_set_cell_type(map, x, y, CELL_EMPTY);
 				map_set_cell_type(map, monster->x, monster->y, CELL_MONSTER);
@@ -156,13 +148,18 @@ void monster_move(struct monster* monster, struct map* map) {
 			break;
 		}
 	}
-	else{
-		map_set_cell_type(map, monster->x, monster->y, CELL_EMPTY);
-	}
+//	else{
+//		map_set_cell_type(map, monster->x, monster->y, CELL_EMPTY);
+//	}
 }
 
-int monster_is_dead(struct monster* monster){
-	if (monster->life <= 0){
+int monster_is_dead(struct monster* monster, struct map* map){
+	if (monster->life == 0){
+		map_set_cell_type(map, monster->x, monster->y, CELL_EMPTY);
+		monster->life = -1;
+		return 1;
+	}
+	if (monster->life < 0){
 		return 1;
 	}
 	return 0;
@@ -171,9 +168,19 @@ int monster_is_dead(struct monster* monster){
 
 void monster_display(struct monster* monster, struct player* player) {
 	assert(monster);
-	if (monster->current_level == player_get_current_level(player) && monster->life > 0){
+	if (monster->current_level == player_get_current_level(player)){
 		window_display_image(sprite_get_monster(monster->current_direction),
 			monster->x * SIZE_BLOC, monster->y * SIZE_BLOC);
 	}
+}
+
+void monster_birth(struct monster* monster, struct player* player, int x, int y){
+	while (monster_get_next_monster(monster) != NULL){
+		monster = monster_get_next_monster(monster);
+	}
+	monster->next_monster = monster_init();
+	monster->x = x;
+	monster->y = y;
+	monster->current_level = player_get_current_level(player);
 }
 

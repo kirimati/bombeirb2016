@@ -2,13 +2,6 @@
 #include <time.h>
 
 #include <game.h>
-#include <misc.h>
-#include <window.h>
-#include <sprite.h>
-#include <bomb.h>
-#include <player.h>
-#include <monster.h>
-#include <constant.h>
 
 int time_paused = 0;
 int time_start_pause = 0;
@@ -18,10 +11,7 @@ struct game {
 	short nb_maps; // nb maps of the game
 	struct player* player;
 	struct bomb* bomb;
-<<<<<<< HEAD
 	struct monster* monster;
-=======
->>>>>>> origin/master
 };
 
 struct game_backup {
@@ -55,20 +45,9 @@ struct game* game_new() {
 	game->map = map_load_data_from_file("data/map_0");
 	game->nb_maps = 8;
 
-<<<<<<< HEAD
 	game->player = player_init(2, 5, 2, 0, 0);
 	game->bomb = bomb_init(game->player);
 	game->monster = monster_init();
-=======
-<<<<<<< HEAD
-	game->player = player_init(4, 5, 2, 0, 0);
-	game->bomb = bomb_init(game->player);
-=======
-	game->player = player_init(1, 5, 2, 0, 0);
-	game->bomb = bomb_init();
-	game->first_bomb = game->bomb;
->>>>>>> origin/master
->>>>>>> origin/master
 	player_from_map(game->player, game->map); // get x,y of the player on the first map
 	monster_from_map(game->monster, game->map, game->player);
 	return game;
@@ -79,10 +58,7 @@ void game_free(struct game* game) {
 
 	player_free(game->player);
 	bomb_free(game->bomb);
-<<<<<<< HEAD
 	monster_free(game->monster);
-=======
->>>>>>> origin/master
 	map_free(game->map);
 }
 
@@ -167,11 +143,11 @@ void game_display(struct game* game) {
 	map_display(game->map);
 	player_display(game->player);
 	while (bomb_get_next_bomb(bomb_tmp) != NULL){
-		bomb_display(bomb_tmp, game->player, game->map, game->monster);
+		bomb_display(bomb_tmp, game->player, game->map, monster_tmp);
 		bomb_tmp = bomb_get_next_bomb(bomb_tmp);
 	}
 	while (monster_get_next_monster(monster_tmp) != NULL){
-		if (!monster_is_dead(monster_tmp)){
+		if (!monster_is_dead(monster_tmp, game->map)){
 			monster_display(monster_tmp, player_tmp);
 		}
 		monster_tmp = monster_get_next_monster(monster_tmp);
@@ -262,7 +238,7 @@ void monster_IA(struct game* game) {
 			if ((t - monster_get_timer_move(monster)) > SPEED_LVL_0){
 				direction = rand() % 4;
 				monster_set_current_way(monster, direction);
-				monster_move(monster, map);
+				monster_move(monster, map, game->player);
 			}
 			monster = monster_get_next_monster(monster);
 		}
@@ -272,7 +248,7 @@ void monster_IA(struct game* game) {
 			if ((t - monster_get_timer_move(monster)) > SPEED_LVL_1){
 				direction = rand() % 4;
 				monster_set_current_way(monster, direction);
-				monster_move(monster, map);
+				monster_move(monster, map, game->player);
 			}
 			monster = monster_get_next_monster(monster);
 		}
@@ -282,7 +258,7 @@ void monster_IA(struct game* game) {
 			if ((t - monster_get_timer_move(monster)) > SPEED_LVL_2){
 				direction = rand() % 4;
 				monster_set_current_way(monster, direction);
-				monster_move(monster, map);
+				monster_move(monster, map, game->player);
 			}
 			monster = monster_get_next_monster(monster);
 		}
@@ -292,7 +268,7 @@ void monster_IA(struct game* game) {
 			if ((t - monster_get_timer_move(monster)) > SPEED_LVL_3){
 				direction = rand() % 4;
 				monster_set_current_way(monster, direction);
-				monster_move(monster, map);
+				monster_move(monster, map, game->player);
 			}
 			monster = monster_get_next_monster(monster);
 		}
@@ -302,7 +278,7 @@ void monster_IA(struct game* game) {
 			if ((t - monster_get_timer_move(monster)) > SPEED_LVL_4){
 				direction = rand() % 4;
 				monster_set_current_way(monster, direction);
-				monster_move(monster, map);
+				monster_move(monster, map, game->player);
 			}
 			monster = monster_get_next_monster(monster);
 		}
@@ -312,7 +288,7 @@ void monster_IA(struct game* game) {
 			if ((t - monster_get_timer_move(monster)) > SPEED_LVL_5){
 				direction = rand() % 4;
 				monster_set_current_way(monster, direction);
-				monster_move(monster, map);
+				monster_move(monster, map, game->player);
 			}
 			monster = monster_get_next_monster(monster);
 		}
@@ -322,7 +298,7 @@ void monster_IA(struct game* game) {
 			if ((t - monster_get_timer_move(monster)) > SPEED_LVL_6){
 				direction = rand() % 4;
 				monster_set_current_way(monster, direction);
-				monster_move(monster, map);
+				monster_move(monster, map, game->player);
 			}
 			monster = monster_get_next_monster(monster);
 		}
@@ -332,7 +308,7 @@ void monster_IA(struct game* game) {
 			if ((t - monster_get_timer_move(monster)) > SPEED_LVL_7){
 				direction = rand() % 4;
 				monster_set_current_way(monster, direction);
-				monster_move(monster, map);
+				monster_move(monster, map, game->player);
 			}
 			monster = monster_get_next_monster(monster);
 		}
@@ -342,10 +318,7 @@ void monster_IA(struct game* game) {
 
 int game_update(struct game* game, struct game_backup* game_backup) {
 	int update;
-<<<<<<< HEAD
 	monster_IA(game);
-=======
->>>>>>> origin/master
 	if (!player_is_dead(game->player)){
 		update = input_keyboard(game);
 		if (update <= 7){
@@ -359,12 +332,9 @@ int game_update(struct game* game, struct game_backup* game_backup) {
 		if (update == 9){
 			update = 1;
 		}
-<<<<<<< HEAD
 		if (update == 10){
 			update = game_pause(game, update);
 		}
-=======
->>>>>>> origin/master
 		return update;
 	}
 	else{
@@ -406,50 +376,66 @@ struct map * game_change_level(struct game* game, struct game_backup* game_backu
 	switch (go){
 	case 0:
 		map_fill_grid(game->map, game_backup->map_0);
-		game->player = player_init(player_get_life(game_get_player(game)), player_get_nb_bomb(game_get_player(game)), player_get_bomb_range(game_get_player(game)), player_get_key(game_get_player(game)), 0);
+		player_change_level(game->player, go);
 		player_from_map(game->player, game->map);
+		monster_free(game->monster);
+		game->monster = monster_init();
 		monster_from_map(game->monster, game->map, game->player);
 		break;
 	case 1:
 		map_fill_grid(game->map, game_backup->map_1);
-		game->player = player_init(player_get_life(game_get_player(game)), player_get_nb_bomb(game_get_player(game)), player_get_bomb_range(game_get_player(game)), player_get_key(game_get_player(game)), 1);
+		player_change_level(game->player, go);
 		player_from_map(game->player, game->map);
+		monster_free(game->monster);
+		game->monster = monster_init();
 		monster_from_map(game->monster, game->map, game->player);
 		break;
 	case 2:
 		map_fill_grid(game->map, game_backup->map_2);
-		game->player = player_init(player_get_life(game_get_player(game)), player_get_nb_bomb(game_get_player(game)), player_get_bomb_range(game_get_player(game)), player_get_key(game_get_player(game)), 2);
+		player_change_level(game->player, go);
 		player_from_map(game->player, game->map);
+		monster_free(game->monster);
+		game->monster = monster_init();
 		monster_from_map(game->monster, game->map, game->player);
 		break;
 	case 3:
 		map_fill_grid(game->map, game_backup->map_3);
-		game->player = player_init(player_get_life(game_get_player(game)), player_get_nb_bomb(game_get_player(game)), player_get_bomb_range(game_get_player(game)), player_get_key(game_get_player(game)), 3);
+		player_change_level(game->player, go);
 		player_from_map(game->player, game->map);
+		monster_free(game->monster);
+		game->monster = monster_init();
 		monster_from_map(game->monster, game->map, game->player);
 		break;
 	case 4:
 		map_fill_grid(game->map, game_backup->map_4);
-		game->player = player_init(player_get_life(game_get_player(game)), player_get_nb_bomb(game_get_player(game)), player_get_bomb_range(game_get_player(game)), player_get_key(game_get_player(game)), 4);
+		player_change_level(game->player, go);
 		player_from_map(game->player, game->map);
+		monster_free(game->monster);
+		game->monster = monster_init();
 		monster_from_map(game->monster, game->map, game->player);
 		break;
 	case 5:
 		map_fill_grid(game->map, game_backup->map_5);
-		game->player = player_init(player_get_life(game_get_player(game)), player_get_nb_bomb(game_get_player(game)), player_get_bomb_range(game_get_player(game)), player_get_key(game_get_player(game)), 5);
+		player_change_level(game->player, go);
 		player_from_map(game->player, game->map);
+		monster_free(game->monster);
+		game->monster = monster_init();
 		monster_from_map(game->monster, game->map, game->player);
 		break;
 	case 6:
 		map_fill_grid(game->map, game_backup->map_6);
-		game->player = player_init(player_get_life(game_get_player(game)), player_get_nb_bomb(game_get_player(game)), player_get_bomb_range(game_get_player(game)), player_get_key(game_get_player(game)), 6);
+		player_change_level(game->player, go);
 		player_from_map(game->player, game->map);
+		monster_free(game->monster);
+		game->monster = monster_init();
 		monster_from_map(game->monster, game->map, game->player);
 		break;
 	case 7:
 		map_fill_grid(game->map, game_backup->map_7);
-		game->player = player_init(player_get_life(game_get_player(game)), player_get_nb_bomb(game_get_player(game)), player_get_bomb_range(game_get_player(game)), player_get_key(game_get_player(game)), 7);
+		player_change_level(game->player, go);
 		player_from_map(game->player, game->map);
+		monster_free(game->monster);
+		game->monster = monster_init();
 		monster_from_map(game->monster, game->map, game->player);
 		break;
 	}

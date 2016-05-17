@@ -2,11 +2,6 @@
 #include <assert.h>
 
 #include <player.h>
-#include <sprite.h>
-#include <window.h>
-#include <misc.h>
-#include <constant.h>
-#include <game.h>
 
 
 struct player {
@@ -109,9 +104,9 @@ void player_dec_nb_bomb(struct player* player) {
 	player->nb_bomb -= 1;
 }
 
-void player_level_up(struct player* player) {
+void player_change_level(struct player* player, int level) {
 	assert(player);
-	player->current_level += 1;
+	player->current_level = level;
 }
 
 void player_from_map(struct player* player, struct map* map) {
@@ -130,7 +125,6 @@ void player_from_map(struct player* player, struct map* map) {
 }
 
 void player_invincibility(struct player* player){
-<<<<<<< HEAD
 	int t;
 	if (time_start_pause > player->invincibility_timer){
 		t = (SDL_GetTicks() - player->invincibility_timer - time_paused);
@@ -138,18 +132,11 @@ void player_invincibility(struct player* player){
 	else{
 		t = (SDL_GetTicks() - player->invincibility_timer);
 	}
-=======
-	int t = (SDL_GetTicks() - player->invincibility_timer);
->>>>>>> origin/master
 	if (t > 2000){
 		player->invincibility = 0;
 	}
 }
 
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
->>>>>>> origin/master
 void player_bonus_effects(struct player* player, struct map* map, int x, int y){
 	switch (map_get_bonus_type(map, x, y)){
 	case BONUS_BOMB_RANGE_DEC:
@@ -218,11 +205,6 @@ int player_move_case_aux(struct player* player, struct map* map, int x, int y){
 	return 0;
 }
 
-<<<<<<< HEAD
-=======
-=======
->>>>>>> origin/master
->>>>>>> origin/master
 static int player_move_aux(struct player* player, struct map* map, int x, int y) {
 
 	if (!map_is_inside(map, x, y))
@@ -240,6 +222,7 @@ static int player_move_aux(struct player* player, struct map* map, int x, int y)
 		break;
 
 	case CELL_MONSTER:
+		player_dec_life(player);
 		break;
 
 	case CELL_DOOR:
@@ -248,25 +231,15 @@ static int player_move_aux(struct player* player, struct map* map, int x, int y)
 		}
 		return 0;
 		break;
+
 	case CELL_KEY:
 		map_open_door(map);
 		player->key++;
 		return 1;
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
->>>>>>> origin/master
 
 	case CELL_BOMB:
 		return 0;
 
-<<<<<<< HEAD
-=======
-=======
-	case CELL_BOMB:
-		return 0;
->>>>>>> origin/master
->>>>>>> origin/master
 	case CELL_EXPLOSION:
 		player_dec_life(player);
 		break;

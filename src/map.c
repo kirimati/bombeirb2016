@@ -114,14 +114,20 @@ void map_set_cell_type(struct map* map, int x, int y, enum cell_type type)
 	map->grid[CELL(x,y)] = type;
 }
 
-void map_set_bonus_type(struct map* map, int x, int y, enum bonus_type type){
+int map_set_bonus_type(struct map* map, int x, int y, enum bonus_type type){
 	assert(map && map_is_inside(map, x, y));
-	if (type == 0x0){
+	switch (type){
+	case BONUS_MONSTER:
+		map->grid[CELL(x,y)] = CELL_MONSTER | (type << 4);
+		return 2;
+	case BONUS_EMPTY:
 		map->grid[CELL(x,y)] = CELL_EMPTY;
-	}
-	else{
+		break;
+	default:
 		map->grid[CELL(x,y)] = CELL_BONUS | (type << 4);
+		break;
 	}
+	return 1;
 }
 
 void map_set_case_type(struct map* map, int x, int y, enum compose_type type){
@@ -140,27 +146,12 @@ void map_open_door(struct map* map){
 	}
 }
 
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
->>>>>>> origin/master
 
 
 void display_bonus(struct map* map, int x, int y, unsigned char type)
 {
 	// bonus are encoded with the 4 most significant bits
 	switch (type >> 4) {
-=======
-enum bonus_type map_get_bonus_type(struct map* map, int x, int y){
-	//assert(map && map_is_inside(map, x, y));
-	return (map->grid[CELL(x, y)] >> 4);
-}
-
-void display_bonus(struct map* map, int x, int y)
-{
-	// bonus is encoded with the 4 most significant bits
-	switch (map_get_bonus_type(map, x, y)) {
->>>>>>> origin/master
 	case BONUS_BOMB_RANGE_INC:
 		window_display_image(sprite_get_bonus(BONUS_BOMB_RANGE_INC), x, y);
 		break;
@@ -229,7 +220,7 @@ void map_display(struct map* map)
 	    	window_display_image(sprite_get_box(), x, y);
 	    	break;
 	    case CELL_BONUS:
-	    	display_bonus(map, x, y);
+	    	display_bonus(map, x, y, type);
 	      	break;
 	    case CELL_KEY:
 	    	window_display_image(sprite_get_key(), x, y);
@@ -237,7 +228,8 @@ void map_display(struct map* map)
 	    case CELL_DOOR:
 	    	display_door(map, x ,y, type);
 	    	break;
-	    case CELL_BOMB:
+	    case CELL_MONSTER:
+
 	    	break;
 	    case CELL_EXPLOSION:
 	    	window_display_image(sprite_get_explosion(), x, y);
