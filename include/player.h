@@ -3,6 +3,11 @@
 
 #include <map.h>
 #include <constant.h>
+#include <player.h>
+#include <sprite.h>
+#include <window.h>
+#include <misc.h>
+#include <game.h>
 
 struct player;
 
@@ -31,8 +36,8 @@ int  player_get_nb_bomb(struct player * player);
 void player_inc_nb_bomb(struct player * player);
 void player_dec_nb_bomb(struct player * player);
 
-// Increase player's current level
-void player_level_up(struct player* player);
+// Change the the current level of the player
+void player_change_level(struct player* player, int level);
 
 // Return bomb range
 int player_get_bomb_range(struct player* player);
@@ -49,21 +54,12 @@ void player_from_map(struct player* player, struct map* map);
 // Disable invincibility when invincibility was enabled more than 2 seconds
 void player_invincibility(struct player* player);
 
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
->>>>>>> origin/master
 // Affects the player when he picks up a bonus
 void player_bonus_effects(struct player* player, struct map* map, int x, int y);
 
 // Allows the player to move a case or not
 int player_move_case_aux(struct player* player, struct map* map, int x, int y);
 
-<<<<<<< HEAD
-=======
-=======
->>>>>>> origin/master
->>>>>>> origin/master
 // Move the player according to the current direction
 int player_move(struct player* player, struct map* map);
 

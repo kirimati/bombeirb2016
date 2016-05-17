@@ -16,7 +16,8 @@ enum cell_type {
 };
 
 enum bonus_type {
-	BONUS_BOMB_RANGE_DEC=1, // 0001
+	BONUS_EMPTY = 0,		// 0000
+	BONUS_BOMB_RANGE_DEC,   // 0001
 	BONUS_BOMB_RANGE_INC, 	// 0010
 	BONUS_BOMB_NB_DEC, 		// 0011
 	BONUS_BOMB_NB_INC, 		// 0100
@@ -86,7 +87,7 @@ enum door_state map_get_door_state(struct map* map, int x, int y);
 void  map_set_cell_type(struct map* map, int x, int y, enum cell_type type);
 
 // Set the type of a bonus cell
-void map_set_bonus_type(struct map* map, int x, int y, enum bonus_type type);
+int map_set_bonus_type(struct map* map, int x, int y, enum bonus_type type);
 
 // Set the type a case cell
 void map_set_case_type(struct map* map, int x, int y, enum compose_type type);
@@ -98,15 +99,7 @@ void map_open_door(struct map* map);
 enum bonus_type map_get_bonus_type(struct map* map, int x, int y);
 
 // Display the different types of bonus
-<<<<<<< HEAD
 void display_bonus(struct map* map, int x, int y, unsigned char type);
-=======
-<<<<<<< HEAD
-void display_bonus(struct map* map, int x, int y, unsigned char type);
-=======
-void display_bonus(struct map* map, int x, int y);
->>>>>>> origin/master
->>>>>>> origin/master
 
 // Test if (x,y) is within the map
 int map_is_inside(struct map* map, int x, int y);

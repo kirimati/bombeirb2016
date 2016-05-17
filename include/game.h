@@ -3,6 +3,12 @@
 
 #include <player.h>
 #include <map.h>
+#include <monster.h>
+#include <misc.h>
+#include <window.h>
+#include <sprite.h>
+#include <bomb.h>
+#include <constant.h>
 
 extern int time_start_pause;
 extern int time_paused;

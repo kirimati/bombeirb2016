@@ -2,8 +2,10 @@
 #define MONSTER_H_
 
 #include <map.h>
-#include <constant.h>
 #include <player.h>
+#include <game.h>
+#include <sprite.h>
+#include <window.h>
 
 struct monster;
 
@@ -36,13 +38,15 @@ struct monster* monster_get_next_monster(struct monster* monster);
 void monster_from_map(struct monster* monster, struct map* map, struct player* player);
 
 // Move the monster according to the current direction
-void monster_move(struct monster* monster, struct map* map);
+void monster_move(struct monster* monster, struct map* map, struct player* player);
 
 // Indicates if monster is dead or not
-int monster_is_dead(struct monster* monster);
+int monster_is_dead(struct monster* monster, struct map* map);
 
 // Display the monster on the screen
 void monster_display(struct monster* monster, struct player* player);
 
+// Creates a monster
+void monster_birth(struct monster* monster, struct player* player, int x, int y);
 
 #endif /* MONSTER_H_ */
