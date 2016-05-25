@@ -3,9 +3,7 @@
 
 #include <map.h>
 #include <player.h>
-#include <game.h>
-#include <sprite.h>
-#include <window.h>
+
 
 struct monster;
 

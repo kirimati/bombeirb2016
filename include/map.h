@@ -43,13 +43,14 @@ enum compose_type {
 };
 
 enum door_to_level {
-	CELL_DOOR_1 = 1, //001 Door to level 1.
-	CELL_DOOR_2, 	 //010 Door to level 2.
-	CELL_DOOR_3,	 //011 Door to level 3.
+	CELL_DOOR_0 = 0, //000 Door to level 0.
+	CELL_DOOR_1, 	 //001 Door to level 1.
+	CELL_DOOR_2,	 //010 Door to level 2.
+	CELL_DOOR_3, 	 //011 Door to level 3.
 	CELL_DOOR_4, 	 //100 Door to level 4.
 	CELL_DOOR_5, 	 //101 Door to level 5.
 	CELL_DOOR_6, 	 //110 Door to level 6.
-	CELL_DOOR_7, 	 //111 Door to level 7.
+	CELL_DOOR_7,	 //111 Door to level 7
 };
 
 enum door_state {
@@ -93,7 +94,7 @@ int map_set_bonus_type(struct map* map, int x, int y, enum bonus_type type);
 void map_set_case_type(struct map* map, int x, int y, enum compose_type type);
 
 // Open door on the map
-void map_open_door(struct map* map);
+void map_open_door(struct map* map, int x, int y);
 
 // Return the type of bonus inside a case
 enum bonus_type map_get_bonus_type(struct map* map, int x, int y);
@@ -113,7 +114,7 @@ void map_display(struct map* map);
 // Load a map (level) from a file
 struct map* map_load_data_from_file(char* filename);
 
-// Fill the grid of map_A with the grid of map_B
-void map_fill_grid(struct map* map_A, struct map* map_B);
+// Save a map in a file
+void map_save_data_in_file(struct map* map, char* filename);
 
 #endif /* MAP_H_ */

@@ -6,13 +6,11 @@
 #include <player.h>
 #include <sprite.h>
 #include <window.h>
-#include <misc.h>
-#include <game.h>
 
 struct player;
 
 // Creates a new player with a given number of available bombs
-struct player* player_init(int life, int bomb_number, int bomb_range,int key, int current_level);
+struct player* player_init(char* filename);
 void player_free(struct player* player);
 
 // Return player's life
@@ -36,6 +34,10 @@ int  player_get_nb_bomb(struct player * player);
 void player_inc_nb_bomb(struct player * player);
 void player_dec_nb_bomb(struct player * player);
 
+// Increase or decrease number of bomb
+void player_inc_range_bomb(struct player* player);
+void player_dec_range_bomb(struct player* player);
+
 // Change the the current level of the player
 void player_change_level(struct player* player, int level);
 
@@ -51,8 +53,8 @@ int player_get_current_level(struct player* player);
 // Load the player position from the map
 void player_from_map(struct player* player, struct map* map);
 
-// Disable invincibility when invincibility was enabled more than 2 seconds
-void player_invincibility(struct player* player);
+// Load the player position next to the where he comes from
+void player_from_map_next_door(struct player* player, struct map* map);
 
 // Affects the player when he picks up a bonus
 void player_bonus_effects(struct player* player, struct map* map, int x, int y);
@@ -68,5 +70,8 @@ void player_display(struct player* player);
 
 // Indicates if player is dead or not
 int player_is_dead(struct player* player);
+
+// Save player's current state in a data file
+void player_save_data_in_file(struct player* player, char* filename);
 
 #endif /* PLAYER_H_ */
