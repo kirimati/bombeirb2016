@@ -2,6 +2,11 @@
 #include <assert.h>
 
 #include <monster.h>
+#include <map.h>
+#include <player.h>
+#include <sprite.h>
+#include <window.h>
+#include <misc.h>
 
 struct monster {
 	int life;
@@ -14,9 +19,9 @@ struct monster {
 
 struct monster* monster_init() {
 	struct monster* monster = malloc(sizeof(*monster));
-	if (!monster)
+	if (!monster){
 		error("Memory error");
-
+	}
 	monster->life = 1;
 	monster->current_direction = SOUTH;
 	monster->timer_move = SDL_GetTicks();

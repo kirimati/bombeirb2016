@@ -2,15 +2,24 @@
 #include <assert.h>
 
 #include <bomb.h>
+#include <player.h>
+#include <monster.h>
+#include <sprite.h>
+#include <window.h>
+#include <map.h>
+#include <game.h>
+
 
 struct bomb {
 	int drop_time;
 	int x;
 	int y;
 	int end_bomb;
+	int range;
 	int level;
 	struct bomb* next_bomb;
 };
+
 
 struct bomb* bomb_init(struct player* player) {
 	struct bomb* bomb = malloc(sizeof(*bomb));
@@ -19,17 +28,26 @@ struct bomb* bomb_init(struct player* player) {
 	}
 	bomb->next_bomb = NULL;
 	bomb->end_bomb = 0;
+	bomb->range = player_get_bomb_range(player);
 	bomb->level = player_get_current_level(player);
+	bomb->x = player_get_x(player);
+	bomb->y = player_get_y(player);
+	bomb->drop_time = SDL_GetTicks();
+
+	player_dec_nb_bomb(player);
 	return bomb;
 }
 
+
 void bomb_free(struct bomb* bomb) {
-	assert(bomb);
-	while (bomb->next_bomb != NULL){
+	if (bomb != NULL){
+		assert(bomb);
+		while (bomb->next_bomb != NULL){
+			free(bomb);
+			bomb = bomb->next_bomb;
+		}
 		free(bomb);
-		bomb = bomb->next_bomb;
 	}
-	free(bomb);
 }
 
 int bomb_get_x(struct bomb* bomb) {
@@ -40,6 +58,16 @@ int bomb_get_x(struct bomb* bomb) {
 int bomb_get_y(struct bomb* bomb) {
 	assert(bomb != NULL);
 	return bomb->y;
+}
+
+int bomb_get_range(struct bomb* bomb) {
+	assert(bomb != NULL);
+	return bomb->range;
+}
+
+int bomb_has_exploded(struct bomb* bomb) {
+	assert(bomb != NULL);
+	return bomb->end_bomb;
 }
 
 struct bomb* bomb_get_next_bomb(struct bomb* bomb){
@@ -76,6 +104,7 @@ int bomb_explosion_gestion_aux(struct bomb* bomb, struct player* player, struct 
 			return 1;
 		case CELL_MONSTER:
 			window_display_image(sprite_get_explosion(), x * SIZE_BLOC, y * SIZE_BLOC);
+			map_set_cell_type(map, x, y, CELL_EMPTY);
 			return 1;
 			break;
 		case CELL_EMPTY:
@@ -88,7 +117,9 @@ int bomb_explosion_gestion_aux(struct bomb* bomb, struct player* player, struct 
 		case CELL_DOOR:
 			return 1;
 		case CELL_BONUS:
-			return 1;
+			map_set_cell_type(map, x, y, CELL_EXPLOSION);
+			window_display_image(sprite_get_explosion(), x * SIZE_BLOC, y * SIZE_BLOC);
+			break;
 		default:
 			break;
 		}
@@ -99,6 +130,8 @@ int bomb_explosion_gestion_aux(struct bomb* bomb, struct player* player, struct 
 int bomb_after_explosion_gestion_aux(struct bomb* bomb, struct player* player, struct map* map, struct monster* monster, int x, int y){
 	if (map_is_inside(map, x, y)){
 		switch (map_get_cell_type(map, x, y)){
+		case CELL_SCENERY:
+			return 1;
 		case CELL_EXPLOSION:
 			map_set_cell_type(map, x, y, CELL_EMPTY);
 			break;
@@ -122,7 +155,7 @@ void bomb_explosion_gestion(struct bomb* bomb, struct player* player, struct map
 	bomb_explosion_gestion_aux(bomb, player, map, bomb->x, bomb->y);
 	bomb_player_gets_harmed(player, bomb->x , bomb->y);
 	bomb_monster_gets_harmed(monster, player, bomb->x , bomb->y);
-	for (int i = 1 ; i <= player_get_bomb_range(player) ; i++){
+	for (int i = 1 ; i <= bomb_get_range(bomb) ; i++){
 		detection = bomb_explosion_gestion_aux(bomb, player, map, (bomb->x + i), bomb->y);
 		bomb_player_gets_harmed(player, (bomb->x + i), bomb->y);
 		bomb_monster_gets_harmed(monster, player, (bomb->x + i), bomb->y);
@@ -130,7 +163,7 @@ void bomb_explosion_gestion(struct bomb* bomb, struct player* player, struct map
 			break;
 		}
 	}
-	for (int i = 1 ; i <= player_get_bomb_range(player) ; i++){
+	for (int i = 1 ; i <= bomb_get_range(bomb) ; i++){
 		detection = bomb_explosion_gestion_aux(bomb, player, map, (bomb->x - i), bomb->y);
 		bomb_player_gets_harmed(player, (bomb->x - i), bomb->y);
 		bomb_monster_gets_harmed(monster, player, (bomb->x - i), bomb->y);
@@ -138,7 +171,7 @@ void bomb_explosion_gestion(struct bomb* bomb, struct player* player, struct map
 			break;
 		}
 	}
-	for (int i = 1 ; i <= player_get_bomb_range(player) ; i++){
+	for (int i = 1 ; i <= bomb_get_range(bomb) ; i++){
 		detection = bomb_explosion_gestion_aux(bomb, player, map, bomb->x, (bomb->y + i));
 		bomb_player_gets_harmed(player, bomb->x, (bomb->y + i));
 		bomb_monster_gets_harmed(monster, player, bomb->x , (bomb->y + i));
@@ -146,7 +179,7 @@ void bomb_explosion_gestion(struct bomb* bomb, struct player* player, struct map
 			break;
 		}
 	}
-	for (int i = 1 ; i <= player_get_bomb_range(player) ; i++){
+	for (int i = 1 ; i <= bomb_get_range(bomb) ; i++){
 		detection = bomb_explosion_gestion_aux(bomb, player, map, bomb->x, (bomb->y - i));
 		bomb_player_gets_harmed(player, bomb->x, (bomb->y - i));
 		bomb_monster_gets_harmed(monster, player, bomb->x, (bomb->y - i));
@@ -160,25 +193,25 @@ void bomb_after_explosion_gestion(struct bomb* bomb, struct player* player, stru
 	int detection;
 	detection = 1;
 	bomb_after_explosion_gestion_aux(bomb, player, map, monster, bomb->x, bomb->y);
-	for (int i = 1 ; i <= player_get_bomb_range(player) ; i++){
+	for (int i = 1 ; i <= bomb_get_range(bomb) ; i++){
 		detection = bomb_after_explosion_gestion_aux(bomb, player, map, monster, (bomb->x + i), bomb->y);
 		if (detection){
 			break;
 		}
 	}
-	for (int i = 1 ; i <= player_get_bomb_range(player) ; i++){
+	for (int i = 1 ; i <= bomb_get_range(bomb) ; i++){
 		detection = bomb_after_explosion_gestion_aux(bomb, player, map, monster, (bomb->x - i), bomb->y);
 		if (detection){
 			break;
 		}
 	}
-	for (int i = 1 ; i <= player_get_bomb_range(player) ; i++){
+	for (int i = 1 ; i <= bomb_get_range(bomb) ; i++){
 		detection = bomb_after_explosion_gestion_aux(bomb, player, map, monster, bomb->x, (bomb->y + i));
 		if (detection){
 			break;
 		}
 	}
-	for (int i = 1 ; i <= player_get_bomb_range(player) ; i++){
+	for (int i = 1 ; i <= bomb_get_range(bomb) ; i++){
 		detection = bomb_after_explosion_gestion_aux(bomb, player, map, monster, bomb->x, (bomb->y - i));
 		if (detection){
 			break;
@@ -195,7 +228,7 @@ void bomb_display(struct bomb* bomb, struct player* player, struct map* map, str
 	else{
 		t = (SDL_GetTicks() - bomb->drop_time);
 	}
-	if(!(bomb->end_bomb) && (bomb->level == player_get_current_level(player))){
+	if(bomb->end_bomb != 1 && (bomb->level == player_get_current_level(player))){
 		if (t <= 1000){
 			window_display_image(sprite_get_bomb(3), bomb->x * SIZE_BLOC, bomb->y * SIZE_BLOC);
 		}
@@ -214,18 +247,20 @@ void bomb_display(struct bomb* bomb, struct player* player, struct map* map, str
 		if (t > 5000){
 			bomb_after_explosion_gestion(bomb, player, map, monster);
 			bomb->end_bomb = 1;
+			player_inc_nb_bomb(player);
 		}
+	}
+	if (t > 5000 && (bomb->end_bomb != 1)){
+		bomb->end_bomb = 1;
+		player_inc_nb_bomb(player);
 	}
 }
 
+
 void bomb_drop(struct bomb* bomb, struct player* player){
-	while (bomb->next_bomb != NULL){
+	while(bomb->next_bomb != NULL){
 		bomb = bomb->next_bomb;
 	}
-	player_dec_nb_bomb(player);
-	bomb->x = player_get_x(player);
-	bomb->y = player_get_y(player);
-	bomb->drop_time = SDL_GetTicks();
 	bomb->next_bomb = bomb_init(player);
 }
 

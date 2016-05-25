@@ -4,7 +4,6 @@
 #include <game.h>
 #include <window.h>
 #include <misc.h>
-#include <bomb.h>
 
 
 int main(int argc, char *argv[]) {
@@ -16,17 +15,16 @@ int main(int argc, char *argv[]) {
 
 
 
-	window_create(SIZE_BLOC * MAP_WIDTH,
-	SIZE_BLOC * MAP_HEIGHT + BANNER_HEIGHT + LINE_HEIGHT);
-
 	SDL_EnableKeyRepeat(SDL_DEFAULT_REPEAT_DELAY, SDL_DEFAULT_REPEAT_INTERVAL);
 
 	// to obtain the DEFAULT_GAME_FPS, we have to reach a loop duration of (1000 / DEFAULT_GAME_FPS) ms
 	int ideal_speed = 1000 / DEFAULT_GAME_FPS;
 	int timer, execution_speed;
 
-	struct game* game = game_new();
-	struct game_backup* game_backup = game_new_backup();
+	struct game_backup* game_backup;
+	struct game* game;
+	game_backup = game_new_backup();
+	game = game_new(game_backup, "data/player.txt");
 
 	// game loop
 	// static time rate implementation
@@ -40,6 +38,14 @@ int main(int argc, char *argv[]) {
 		execution_speed = SDL_GetTicks() - timer;
 		if (execution_speed < ideal_speed){
 			SDL_Delay(ideal_speed - execution_speed); // we are ahead of ideal time. let's wait.
+		}
+		if (update == 2){
+			game_backup_free(game_backup);
+			game_free(game);
+
+			game_backup = game_new_backup2();
+			game = game_new(game_backup, "data_backup/player.txt");
+			update = 0;
 		}
 	}
 	game_backup_free(game_backup);

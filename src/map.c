@@ -9,9 +9,6 @@
 #include <misc.h>
 #include <sprite.h>
 #include <window.h>
-#include <player.h>
-#include <bomb.h>
-#include <game.h>
 
 struct map {
 	int width;
@@ -135,15 +132,9 @@ void map_set_case_type(struct map* map, int x, int y, enum compose_type type){
 	map->grid[CELL(x,y)] = type;
 }
 
-void map_open_door(struct map* map){
+void map_open_door(struct map* map, int x, int y){
 	assert(map);
-	for (int i = 0; i < map_get_width(map); i++) {
-		for (int j = 0; j < map_get_height(map); j++) {
-			if (map_get_cell_type(map, i, j) == CELL_DOOR) {
-		     	map->grid[CELL(i,j)] = (map->grid[CELL(i,j)] | (CELL_DOOR_OPENED << 7));
-			}
-		}
-	}
+	map->grid[CELL(x,y)] = (map->grid[CELL(x,y)] | (CELL_DOOR_OPENED << 7));
 }
 
 
@@ -234,6 +225,9 @@ void map_display(struct map* map)
 	    case CELL_EXPLOSION:
 	    	window_display_image(sprite_get_explosion(), x, y);
 	    	break;
+	    case CELL_PRINCESS:
+	    	window_display_image(sprite_get_princess(), x, y);
+	    	break;
 	    }
 	  }
 	}
@@ -254,7 +248,7 @@ struct map* map_load_data_from_file(char* filename)
 	struct map* map = map_new(width, height);
 
 	// fill the map with data from file
-	for (int i = 0 ; i < width*height; i++){
+	for (int i = 0 ; i <= width*height; i++){
 		fscanf (file, "%d", &c);
 		map->grid[i] = c;
 	}
@@ -262,8 +256,22 @@ struct map* map_load_data_from_file(char* filename)
 	return map;
 }
 
-void map_fill_grid(struct map* map_A, struct map* map_B){
-	for (int i = 0 ; i < map_get_width(map_B)*map_get_height(map_B) ; i++){
-		map_A->grid[i] = map_B->grid[i];
+
+void map_save_data_in_file(struct map* map, char* filename){
+	unsigned char c;
+	int width = map_get_width(map);
+	int height = map_get_height(map);
+	FILE* file;
+	file = fopen(filename, "w");
+
+	fprintf(file, "%d:", width);
+	fprintf(file, "%d \n", height);
+
+	for (int i = 0 ; i < width*height; i++){
+		c = map->grid[i];
+		fprintf(file, "%hhu ", c);
+
 	}
+	fclose (file);
 }
+

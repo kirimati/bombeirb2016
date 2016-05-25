@@ -2,19 +2,25 @@
 #include <time.h>
 
 #include <game.h>
+#include <player.h>
+#include <monster.h>
+#include <sprite.h>
+#include <window.h>
+#include <map.h>
+#include <bomb.h>
 
 int time_paused = 0;
 int time_start_pause = 0;
 
 struct game {
-	struct map* map; // the game's map
-	short nb_maps; // nb maps of the game
+	struct map* map; // the game's current map
 	struct player* player;
 	struct bomb* bomb;
 	struct monster* monster;
 };
 
 struct game_backup {
+	// every map of the game saved in memory
 	struct map* map_0;
 	struct map* map_1;
 	struct map* map_2;
@@ -38,18 +44,33 @@ struct game_backup* game_new_backup(){
 	return game_backup;
 }
 
-struct game* game_new() {
+struct game_backup* game_new_backup2(){
+	struct game_backup* game_backup = malloc(sizeof *game_backup);
+	game_backup->map_0 = map_load_data_from_file("data_backup/map_0.txt");
+	game_backup->map_1 = map_load_data_from_file("data_backup/map_1.txt");
+	game_backup->map_2 = map_load_data_from_file("data_backup/map_2.txt");
+	game_backup->map_3 = map_load_data_from_file("data_backup/map_3.txt");
+	game_backup->map_4 = map_load_data_from_file("data_backup/map_4.txt");
+	game_backup->map_5 = map_load_data_from_file("data_backup/map_5.txt");
+	game_backup->map_6 = map_load_data_from_file("data_backup/map_6.txt");
+	game_backup->map_7 = map_load_data_from_file("data_backup/map_7.txt");
+	return game_backup;
+}
+
+struct game* game_new(struct game_backup* game_backup, char* filename) {
 	sprite_load(); // load sprites into process memory
 
 	struct game* game = malloc(sizeof(*game));
-	game->map = map_load_data_from_file("data/map_0");
-	game->nb_maps = 8;
+	game->player = player_init(filename);
+	game_choose_map(game, game_backup);
 
-	game->player = player_init(2, 5, 2, 0, 0);
-	game->bomb = bomb_init(game->player);
+	window_create(SIZE_BLOC * map_get_width(game->map),
+	SIZE_BLOC * map_get_height(game->map) + BANNER_HEIGHT + LINE_HEIGHT);
+
+	game->bomb = NULL;
 	game->monster = monster_init();
 	player_from_map(game->player, game->map); // get x,y of the player on the first map
-	monster_from_map(game->monster, game->map, game->player);
+	monster_from_map(game->monster, game->map, game->player); // Initialize every monster on the map
 	return game;
 }
 
@@ -142,16 +163,27 @@ void game_display(struct game* game) {
 	game_banner_display(game);
 	map_display(game->map);
 	player_display(game->player);
-	while (bomb_get_next_bomb(bomb_tmp) != NULL){
-		bomb_display(bomb_tmp, game->player, game->map, monster_tmp);
-		bomb_tmp = bomb_get_next_bomb(bomb_tmp);
+	// Bomb display
+	if (bomb_tmp != NULL){
+		if (bomb_get_next_bomb(bomb_tmp) == NULL){
+			bomb_display(bomb_tmp, game->player, game->map, monster_tmp);
+		}
+		else{
+			while (bomb_get_next_bomb(bomb_tmp) != NULL){
+				bomb_display(bomb_tmp, game->player, game->map, monster_tmp);
+				bomb_tmp = bomb_get_next_bomb(bomb_tmp);
+			}
+			bomb_display(bomb_tmp, game->player, game->map, monster_tmp);
+		}
 	}
+	// Monsters display
 	while (monster_get_next_monster(monster_tmp) != NULL){
 		if (!monster_is_dead(monster_tmp, game->map)){
 			monster_display(monster_tmp, player_tmp);
 		}
 		monster_tmp = monster_get_next_monster(monster_tmp);
 	}
+
 	window_refresh();
 }
 
@@ -210,12 +242,27 @@ short input_keyboard(struct game* game) {
 				update = player_move(player, map);
 				break;
 			case SDLK_SPACE:
+				// Creates a bomb at the end of chained list
 				if (player_get_nb_bomb(player) > 0) {
+					if (game->bomb == NULL){
+						game->bomb = bomb_init(player);
+					}
+					else{
 					bomb_drop(game->bomb, player);
+					}
 				}
 				break;
 			case SDLK_p:
+				// Pause game
 				return 10;
+			case SDLK_s:
+				// Save game
+				return 11;
+				break;
+			case SDLK_l:
+				// Load game
+				return 12;
+				break;
 			default:
 				update = 8;
 				break;
@@ -227,7 +274,8 @@ short input_keyboard(struct game* game) {
 }
 
 
-void monster_IA(struct game* game) {
+void monster_AI(struct game* game) {
+	// Makes the monsters move randomly and more or less faster depending on their level
 	struct monster* monster = game_get_monster(game);
 	struct map* map = game_get_map(game);
 	int direction;
@@ -318,22 +366,31 @@ void monster_IA(struct game* game) {
 
 int game_update(struct game* game, struct game_backup* game_backup) {
 	int update;
-	monster_IA(game);
+	monster_AI(game);
 	if (!player_is_dead(game->player)){
 		update = input_keyboard(game);
 		if (update <= 7){
-			game_keep_backup(game, game_backup);
 			game_change_level(game, game_backup, update);
 			update = 0;
 		}
 		if (update == 8){
+			// The player is staying on the same level
 			update = 0;
 		}
 		if (update == 9){
+			// The player is quitting the game
 			update = 1;
 		}
 		if (update == 10){
 			update = game_pause(game, update);
+		}
+		if (update == 11){
+			game_save(game, game_backup);
+			update = 0;
+		}
+		if (update == 12){
+			// The player is loading the last saved game
+			update = 2;
 		}
 		return update;
 	}
@@ -342,102 +399,122 @@ int game_update(struct game* game, struct game_backup* game_backup) {
 	}
 }
 
-void game_keep_backup(struct game* game, struct game_backup* game_backup){
+void game_choose_map(struct game* game, struct game_backup* game_backup){
+	// Puts the player on the right map when a game is started.
 	switch (player_get_current_level(game->player)){
 	case 0:
-		map_fill_grid(game_backup->map_0, game->map);
+		game->map = game_backup->map_0;
 		break;
 	case 1:
-		map_fill_grid(game_backup->map_1, game->map);
+		game->map = game_backup->map_1;
 		break;
 	case 2:
-		map_fill_grid(game_backup->map_2, game->map);
+		game->map = game_backup->map_2;
 		break;
 	case 3:
-		map_fill_grid(game_backup->map_3, game->map);
+		game->map = game_backup->map_3;
 		break;
 	case 4:
-		map_fill_grid(game_backup->map_4, game->map);
+		game->map = game_backup->map_4;
 		break;
 	case 5:
-		map_fill_grid(game_backup->map_5, game->map);
+		game->map = game_backup->map_5;
 		break;
 	case 6:
-		map_fill_grid(game_backup->map_6, game->map);
+		game->map = game_backup->map_6;
 		break;
 	case 7:
-		map_fill_grid(game_backup->map_7, game->map);
+		game->map = game_backup->map_7;
 		break;
 	}
 }
 
 struct map * game_change_level(struct game* game, struct game_backup* game_backup, int go){
-	map_empty_grid(game->map);
 	switch (go){
 	case 0:
-		map_fill_grid(game->map, game_backup->map_0);
+		game->map = game_backup->map_0;
+		player_from_map_next_door(game->player, game->map);
 		player_change_level(game->player, go);
-		player_from_map(game->player, game->map);
+		window_create(SIZE_BLOC * map_get_width(game->map), SIZE_BLOC * map_get_height(game->map) + BANNER_HEIGHT + LINE_HEIGHT);
 		monster_free(game->monster);
 		game->monster = monster_init();
 		monster_from_map(game->monster, game->map, game->player);
 		break;
 	case 1:
-		map_fill_grid(game->map, game_backup->map_1);
+		game->map = game_backup->map_1;
+		player_from_map_next_door(game->player, game->map);
 		player_change_level(game->player, go);
-		player_from_map(game->player, game->map);
+		window_create(SIZE_BLOC * map_get_width(game->map), SIZE_BLOC * map_get_height(game->map) + BANNER_HEIGHT + LINE_HEIGHT);
 		monster_free(game->monster);
 		game->monster = monster_init();
 		monster_from_map(game->monster, game->map, game->player);
 		break;
 	case 2:
-		map_fill_grid(game->map, game_backup->map_2);
+		game->map = game_backup->map_2;
+		player_from_map_next_door(game->player, game->map);
 		player_change_level(game->player, go);
-		player_from_map(game->player, game->map);
+		window_create(SIZE_BLOC * map_get_width(game->map), SIZE_BLOC * map_get_height(game->map) + BANNER_HEIGHT + LINE_HEIGHT);
 		monster_free(game->monster);
 		game->monster = monster_init();
 		monster_from_map(game->monster, game->map, game->player);
 		break;
 	case 3:
-		map_fill_grid(game->map, game_backup->map_3);
+		game->map = game_backup->map_3;
+		player_from_map_next_door(game->player, game->map);
 		player_change_level(game->player, go);
-		player_from_map(game->player, game->map);
+		window_create(SIZE_BLOC * map_get_width(game->map), SIZE_BLOC * map_get_height(game->map) + BANNER_HEIGHT + LINE_HEIGHT);
 		monster_free(game->monster);
 		game->monster = monster_init();
 		monster_from_map(game->monster, game->map, game->player);
 		break;
 	case 4:
-		map_fill_grid(game->map, game_backup->map_4);
+		game->map = game_backup->map_4;
+		player_from_map_next_door(game->player, game->map);
 		player_change_level(game->player, go);
-		player_from_map(game->player, game->map);
+		window_create(SIZE_BLOC * map_get_width(game->map), SIZE_BLOC * map_get_height(game->map) + BANNER_HEIGHT + LINE_HEIGHT);
 		monster_free(game->monster);
 		game->monster = monster_init();
 		monster_from_map(game->monster, game->map, game->player);
 		break;
 	case 5:
-		map_fill_grid(game->map, game_backup->map_5);
+		game->map = game_backup->map_5;
+		player_from_map_next_door(game->player, game->map);
 		player_change_level(game->player, go);
-		player_from_map(game->player, game->map);
+		window_create(SIZE_BLOC * map_get_width(game->map), SIZE_BLOC * map_get_height(game->map) + BANNER_HEIGHT + LINE_HEIGHT);
 		monster_free(game->monster);
 		game->monster = monster_init();
 		monster_from_map(game->monster, game->map, game->player);
 		break;
 	case 6:
-		map_fill_grid(game->map, game_backup->map_6);
+		game->map = game_backup->map_6;
+		player_from_map_next_door(game->player, game->map);
 		player_change_level(game->player, go);
-		player_from_map(game->player, game->map);
+		window_create(SIZE_BLOC * map_get_width(game->map), SIZE_BLOC * map_get_height(game->map) + BANNER_HEIGHT + LINE_HEIGHT);
 		monster_free(game->monster);
 		game->monster = monster_init();
 		monster_from_map(game->monster, game->map, game->player);
 		break;
 	case 7:
-		map_fill_grid(game->map, game_backup->map_7);
+		game->map = game_backup->map_7;
+		player_from_map_next_door(game->player, game->map);
 		player_change_level(game->player, go);
-		player_from_map(game->player, game->map);
+		window_create(SIZE_BLOC * map_get_width(game->map), SIZE_BLOC * map_get_height(game->map) + BANNER_HEIGHT + LINE_HEIGHT);
 		monster_free(game->monster);
 		game->monster = monster_init();
 		monster_from_map(game->monster, game->map, game->player);
 		break;
 	}
 	return game->map;
+}
+
+void game_save(struct game* game, struct game_backup* game_backup){
+	player_save_data_in_file(game->player, "data_backup/player.txt");
+	map_save_data_in_file(game_backup->map_0, "data_backup/map_0.txt");
+	map_save_data_in_file(game_backup->map_1, "data_backup/map_1.txt");
+	map_save_data_in_file(game_backup->map_2, "data_backup/map_2.txt");
+	map_save_data_in_file(game_backup->map_3, "data_backup/map_3.txt");
+	map_save_data_in_file(game_backup->map_4, "data_backup/map_4.txt");
+	map_save_data_in_file(game_backup->map_5, "data_backup/map_5.txt");
+	map_save_data_in_file(game_backup->map_6, "data_backup/map_6.txt");
+	map_save_data_in_file(game_backup->map_7, "data_backup/map_7.txt");
 }

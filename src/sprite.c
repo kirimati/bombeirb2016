@@ -55,6 +55,9 @@
 #define PLAYER_RIGHT    "sprite/player_right.png"
 #define PLAYER_DOWN     "sprite/player_down.png"
 
+// Sprite of Princess
+#define PRINCESS     "sprite/bomberwoman.png"
+
 //Sprites of Monsters
 #define MONSTER_LEFT     "sprite/monster_left.png"
 #define MONSTER_UP       "sprite/monster_up.png"
@@ -78,6 +81,7 @@ SDL_Surface* door_opened;
 SDL_Surface* door_closed;
 SDL_Surface* stone;
 SDL_Surface* tree;
+SDL_Surface* princess;
 
 // bonus
 #define NB_BONUS 6
@@ -139,6 +143,7 @@ void map_load() {
 	stone = load_image(MAP_STONE);
 	door_opened = load_image(MAP_DOOR_OPENED);
 	door_closed = load_image(MAP_DOOR_CLOSED);
+	princess = load_image(PRINCESS);
 }
 
 void map_unload() {
@@ -150,6 +155,7 @@ void map_unload() {
 	SDL_FreeSurface(door_opened);
 	SDL_FreeSurface(door_closed);
 	SDL_FreeSurface(explosion);
+	SDL_FreeSurface(princess);
 }
 
 void bonus_load() {
@@ -234,7 +240,7 @@ void sprite_free() {
 }
 
 SDL_Surface* sprite_get_number(short number) {
-	assert(number >= 0 && number < 9);
+	assert(number >= 0 && number <= 9);
 	return numbers[number];
 }
 
@@ -281,6 +287,11 @@ SDL_Surface* sprite_get_bonus(enum bonus_type bonus_type) {
 SDL_Surface* sprite_get_tree() {
 	assert(tree);
 	return tree;
+}
+
+SDL_Surface* sprite_get_princess(){
+	assert(princess);
+	return princess;
 }
 
 SDL_Surface* sprite_get_box() {

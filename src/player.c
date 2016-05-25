@@ -2,6 +2,10 @@
 #include <assert.h>
 
 #include <player.h>
+#include <map.h>
+#include <sprite.h>
+#include <window.h>
+#include <game.h>
 
 
 struct player {
@@ -16,11 +20,26 @@ struct player {
 	int invincibility_timer;
 };
 
-struct player* player_init(int life, int bomb_number, int bomb_range, int key, int current_level) {
+struct player* player_init(char* filename) {
 	struct player* player = malloc(sizeof(*player));
 	if (!player)
 		error("Memory error");
+	int life;
+	int bomb_number;
+	int bomb_range;
+	int key;
+	int current_level;
+	FILE* file;
+	file = fopen(filename, "r");
 
+	// get height and width from file
+	fscanf (file, "%d", &life);
+	fscanf (file, "%d", &bomb_number);
+	fscanf (file, "%d", &bomb_range);
+	fscanf (file, "%d", &key);
+	fscanf (file, "%d", &current_level);
+
+	fclose (file);
 
 	player->life = life;
 	player->current_direction = SOUTH;
@@ -45,12 +64,14 @@ int player_get_life(struct player* player){
 
 void player_inc_life(struct player* player){
 	assert(player);
-	player->life += 1;
+	if (player->life < 9){
+		player->life += 1;
+	}
 }
 
 void player_dec_life(struct player* player){
 	assert(player);
-	if (player->invincibility == 0){
+	if ((player->invincibility == 0) && (player->life > 0)){
 		player->life -= 1;
 		player->invincibility_timer = SDL_GetTicks();
 		player->invincibility = 1;
@@ -96,12 +117,29 @@ int player_get_current_level(struct player* player){
 
 void player_inc_nb_bomb(struct player* player) {
 	assert(player);
-	player->nb_bomb += 1;
+	if (player->nb_bomb < 9){
+		player->nb_bomb += 1;
+	}
 }
 
 void player_dec_nb_bomb(struct player* player) {
 	assert(player);
-	player->nb_bomb -= 1;
+	if (player->nb_bomb > 0){
+		player->nb_bomb -= 1;
+	}
+}
+
+void player_inc_range_bomb(struct player* player) {
+	assert(player);
+	if (player->bomb_range < 9){
+		player->bomb_range += 1;
+	}
+}
+void player_dec_range_bomb(struct player* player) {
+	assert(player);
+	if (player->bomb_range > 1){
+		player->bomb_range -= 1;
+	}
 }
 
 void player_change_level(struct player* player, int level) {
@@ -124,6 +162,21 @@ void player_from_map(struct player* player, struct map* map) {
 	}
 }
 
+void player_from_map_next_door(struct player* player, struct map* map) {
+	assert(player);
+	assert(map);
+
+	int i, j;
+	for (i = 0; i < map_get_width(map); i++) {
+	  for (j = 0; j < map_get_height(map); j++) {
+	    if (map_get_cell_type(map, i, j) == CELL_DOOR && map_get_door_to_level(map, i, j) == player_get_current_level(player)) {
+	      player->x = i + 1;
+	      player->y = j;
+	    }
+	  }
+	}
+}
+
 void player_invincibility(struct player* player){
 	int t;
 	if (time_start_pause > player->invincibility_timer){
@@ -140,23 +193,43 @@ void player_invincibility(struct player* player){
 void player_bonus_effects(struct player* player, struct map* map, int x, int y){
 	switch (map_get_bonus_type(map, x, y)){
 	case BONUS_BOMB_RANGE_DEC:
-		player->bomb_range--;
+		player_dec_range_bomb(player);
 		break;
 	case BONUS_BOMB_RANGE_INC:
-		player->bomb_range++;
+		player_inc_range_bomb(player);
 		break;
 	case BONUS_BOMB_NB_DEC:
-		player->nb_bomb--;
+		player_dec_nb_bomb(player);
 		break;
 	case BONUS_BOMB_NB_INC:
-		player->nb_bomb++;
+		player_inc_nb_bomb(player);
 		break;
 	case BONUS_LIFE:
-		player->life++;
+		if (player->life < 9){
+			player->life++;
+		}
 		break;
 	default:
 		break;
 	}
+}
+
+void player_open_door(struct player* player, struct map* map){
+	switch(player->current_direction){
+	case NORTH:
+		map_open_door(map, player_get_x(player), player_get_y(player) - 1);
+		break;
+	case SOUTH:
+		map_open_door(map, player_get_x(player), player_get_y(player) + 1);
+		break;
+	case WEST:
+		map_open_door(map, player_get_x(player) - 1, player_get_y(player));
+		break;
+	case EAST:
+		map_open_door(map, player_get_x(player) + 1, player_get_y(player));
+		break;
+	}
+	player->key--;
 }
 
 int player_move_case_aux(struct player* player, struct map* map, int x, int y){
@@ -229,12 +302,18 @@ static int player_move_aux(struct player* player, struct map* map, int x, int y)
 		if (map_get_door_state(map, x, y)){
 			return 1;
 		}
+		else{
+			if (player_get_key(player) > 0){
+				player_open_door(player, map);
+			}
+		}
 		return 0;
 		break;
 
 	case CELL_KEY:
-		map_open_door(map);
-		player->key++;
+		if (player->key < 9){
+			player->key++;
+		}
 		return 1;
 
 	case CELL_BOMB:
@@ -243,7 +322,8 @@ static int player_move_aux(struct player* player, struct map* map, int x, int y)
 	case CELL_EXPLOSION:
 		player_dec_life(player);
 		break;
-
+	case CELL_PRINCESS:
+		return 1;
 	default:
 		break;
 	}
@@ -255,7 +335,8 @@ static int player_move_aux(struct player* player, struct map* map, int x, int y)
 int player_move(struct player* player, struct map* map) {
 	int x = player->x;
 	int y = player->y;
-	int move = 8;
+	int move = 8; // Move = 8 when the player doesn't change level
+				  // Move = 0,1,2,3,4,..,7 when the player goes to level 0,1,2,3,4,...,7
 	unsigned char type;
 
 	switch (player->current_direction) {
@@ -275,6 +356,9 @@ int player_move(struct player* player, struct map* map) {
 				break;
 			case CELL_DOOR:
 				move = map_get_door_to_level(map ,x , y - 1);
+				return move;
+			case CELL_PRINCESS:
+				move = 9; // end game
 				return move;
 			default :
 				break;
@@ -302,6 +386,9 @@ int player_move(struct player* player, struct map* map) {
 			case CELL_DOOR:
 				move = map_get_door_to_level(map, x, y + 1);
 				return move;
+			case CELL_PRINCESS:
+				move = 9; // end game
+				return move;
 			default :
 				break;
 			}
@@ -328,6 +415,9 @@ int player_move(struct player* player, struct map* map) {
 			case CELL_DOOR:
 				move = map_get_door_to_level(map, x - 1, y);
 				return move;
+			case CELL_PRINCESS:
+				move = 9; // end game
+				return move;
 			default :
 				break;
 			}
@@ -353,6 +443,9 @@ int player_move(struct player* player, struct map* map) {
 				break;
 			case CELL_DOOR:
 				move = map_get_door_to_level(map, x + 1, y);
+				return move;
+			case CELL_PRINCESS:
+				move = 9; // end game
 				return move;
 			default:
 				break;
@@ -381,4 +474,17 @@ int player_is_dead(struct player* player){
 	else{
 		return 0;
 	}
+}
+
+void player_save_data_in_file(struct player* player, char* filename){
+	FILE* file;
+	file = fopen(filename, "w");
+
+	fprintf(file, "%d ", player->life);
+	fprintf(file, "%d ", player->nb_bomb);
+	fprintf(file, "%d ", player->bomb_range);
+	fprintf(file, "%d ", player->key);
+	fprintf(file, "%d ", player->current_level);
+
+	fclose (file);
 }
